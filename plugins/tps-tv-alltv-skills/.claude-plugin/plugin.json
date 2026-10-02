@@ -1,0 +1,9 @@
+{
+  "name": "tps-tv-alltv-skills",
+  "version": "1.0.0",
+  "description": "Public-safe Technical Validation skills with runtime field discovery and user-configured authenticated connectors.",
+  "author": {
+    "name": "adobe-dss-aep",
+    "url": "https://github.com/adobe-dss-aep"
+  }
+}

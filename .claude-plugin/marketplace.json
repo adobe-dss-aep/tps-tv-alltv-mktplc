@@ -1,0 +1,14 @@
+{
+  "name": "tps-tv-alltv-mktplc",
+  "owner": {
+    "name": "adobe-dss-aep",
+    "url": "https://github.com/adobe-dss-aep"
+  },
+  "plugins": [
+    {
+      "name": "tps-tv-alltv-skills",
+      "source": "./plugins/tps-tv-alltv-skills",
+      "description": "Technical-validation skills for request and opportunity context, pipeline summaries, and explicitly requested SharePoint attachments."
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+	"tpsaccountid": null,
+	"tpsprojectid": null,
+	"tpsrequestid": null,
+	"tpsc": {
+		"account": {
+			"tpsaccountid": null,
+			"accountname": null,
+			"sub_name": null
+		},
+		"project": {
+			"tpsprojectid": null,
+			"primary_opportunity_link": null,
+			"tpsaccountid": null,
+			"accountname": null,
+			"drnumber": null,
+			"opportunityname": null,
+			"salesstage": null,
+			"closedate": null,
+			"closequarter": null,
+			"adjcommit": null,
+			"totalgnarr": null,
+			"povstatus": null,
+			"techcasestatus": null,
+			"techdriver": null,
+			"techdriveremail": null,
+			"techfit": null,
+			"techwin": null,
+			"techriskrating": null,
+			"techriskcategory": null,
+			"techriskcomments": null,
+			"tpsarchdesign": null,
+			"tpsbusinessdriver": null,
+			"projectlastupdate": null,
+			"objectives": null,
+			"use_cases": [],
+			"influenced_pipeline_usd": {
+				"net_new_usd": null,
+				"renewed_arr_usd": null,
+				"grand_total_usd": null,
+				"derivation": "",
+				"note": ""
+			}
+		},
+		"request": {
+			"tpsrequestid": null,
+			"tv_request_link": null,
+			"drnumber": null,
+			"requestname": null,
+			"requesttype": null,
+			"requeststage": null,
+			"requeststatus": null,
+			"requesthealth": null,
+			"requestmotion": null,
+			"requestgeo": null,
+			"productfocus": null,
+			"requestlead": null,
+			"requestlastupdate": null,
+			"actualcompletiondate": null,
+			"blockerinfo": null,
+			"latestcomment": null,
+			"products_in_scope": [],
+			"timeline": {
+				"proposed_start": null,
+				"proposed_due": null,
+				"dates_flexible": null
+			}
+		}
+	}
+}

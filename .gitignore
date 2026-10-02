@@ -1,0 +1,9 @@
+.vscode/
+.claude/
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+context-*.json
+opp-context-*.json
