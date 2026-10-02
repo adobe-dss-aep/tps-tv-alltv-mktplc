@@ -44,7 +44,8 @@ validated by this repository's structural checks.
 The JSON files called `*-schema.json` are empty output-shape templates, not formal
 JSON Schema validators. Fill them only with authorized data gathered at runtime.
 Never commit generated customer context, user identities, credentials, or uploads
-to this public repository.
+to this public repository. Root-level generated context files are ignored as a
+convenience; keep runtime outputs in a separate private working directory.
 
 ## Maintenance
 

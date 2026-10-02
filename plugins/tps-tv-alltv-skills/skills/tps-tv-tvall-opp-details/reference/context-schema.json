@@ -1,0 +1,304 @@
+{
+	"tpsaccountid": null,
+	"tpsprojectid": null,
+	"tpsrequestid": null,
+	"account": "",
+	"record_links": {
+		"tv_request_issue": "",
+		"tv_request_issue_reference": null,
+		"primary_opportunity_project": "",
+		"primary_opportunity_project_reference": null,
+		"deliverable_wiki": null,
+		"additional_links": null,
+		"linked_opportunities": []
+	},
+	"account_firmographics": {
+		"account_name": null,
+		"sub_name": null,
+		"account_id": null,
+		"sfdc_account_id": null,
+		"sub_id": null,
+		"industry": null,
+		"dx_segment": null,
+		"sales_segment": null,
+		"market_area": null,
+		"revenue": null,
+		"employees": null,
+		"account_manager": {
+			"name": null,
+			"email": null,
+			"title": null
+		},
+		"business_driver": {
+			"name": null,
+			"email": null,
+			"title": null
+		},
+		"project_owner": {
+			"name": null,
+			"email": null,
+			"title": null
+		},
+		"links": {
+			"salesforce": null,
+			"dynamics": null,
+			"panorama": null,
+			"spog": null,
+			"exec_summary": null
+		},
+		"cross_project_consistency": {
+			"projects_checked": [],
+			"consistent": null,
+			"divergences": []
+		},
+		"source": "project:{DR or GUID}:TPS Opportunity Account Firmagraphics"
+	},
+	"opportunity": {
+		"deal_registration_id": null,
+		"name": null,
+		"sales_stage": null,
+		"gnarr": {
+			"net_new_usd": null,
+			"renewed_arr_usd": null,
+			"deal_grand_total_usd": null,
+			"deal_band": null,
+			"by_solution": {},
+			"renewed_by_solution": {},
+			"rollup_only": false,
+			"source": ""
+		},
+		"deal_type": null,
+		"vertical": null,
+		"sales_region": null,
+		"gtm_team": null,
+		"adjusted_commit": null,
+		"strategic_sales_play": null,
+		"application_sales_tactics": null,
+		"open_date": null,
+		"close_date": null,
+		"crm": {
+			"opportunity_id": null,
+			"sfdc_opportunity_id": null,
+			"sfdc_url": null,
+			"dynamics_url": null
+		},
+		"opportunity_details": {
+			"business_issue_identified": null,
+			"business_objectives": [],
+			"pains_challenges": [],
+			"use_cases": [],
+			"success_criteria": null,
+			"exec_summary": null,
+			"current_tech_stack": [],
+			"security_compliance_considerations": null,
+			"competitors": null,
+			"tech_validation": {
+				"tech_fit": null,
+				"tech_win": null,
+				"tech_risk_rating": null,
+				"tech_risk_category": null,
+				"tech_risk_mitigation": null,
+				"pov_completion_status": null,
+				"technical_case_completion_status": null
+			},
+			"team": {
+				"tech_driver": {
+					"name": null,
+					"email": null,
+					"title": null
+				},
+				"primary_ea": {
+					"name": null,
+					"email": null,
+					"title": null
+				},
+				"named_isc": {
+					"name": null,
+					"email": null,
+					"title": null
+				}
+			},
+			"authoring": null,
+			"source": "project:{DR or GUID}:TPS Opportunity Details"
+		},
+		"source": ""
+	},
+	"offering": {
+		"type": null,
+		"motion": null,
+		"focus": null,
+		"geo": null,
+		"onsite_required": null,
+		"source": ""
+	},
+	"products_in_scope": [],
+	"timeline": {
+		"proposed_start": null,
+		"proposed_due": null,
+		"dates_flexible": null,
+		"source": ""
+	},
+	"team": {
+		"adobe": [],
+		"customer": [],
+		"customer_roles_mentioned": []
+	},
+	"objectives": null,
+	"use_cases": [],
+	"request": {
+		"competitor_involved": null,
+		"competitor": null,
+		"shared_to_date": null,
+		"impacts_additional_opportunities": null,
+		"comments": null,
+		"source": ""
+	},
+	"engagement": {
+		"project_stage": null,
+		"project_health": null,
+		"risk_blocker": null,
+		"delivery_date_known": null,
+		"agreed_delivery_date": null,
+		"delivery_location": null,
+		"latest_update": null,
+		"source": ""
+	},
+	"narrative_context": {
+		"workstreams": [],
+		"source": "",
+		"note": ""
+	},
+	"linked_opportunities": [
+		{
+			"id": null,
+			"name": null,
+			"reference": null,
+			"fetched": false,
+			"gnarr": {
+				"net_new_usd": null,
+				"renewed_arr_usd": null,
+				"deal_grand_total_usd": null,
+				"deal_band": null,
+				"by_solution": {},
+				"renewed_by_solution": {},
+				"rollup_only": false,
+				"source": ""
+			},
+			"firmographics": {
+				"sales_stage": null,
+				"products": []
+			},
+			"account": {
+				"account_name": null,
+				"account_id": null,
+				"sfdc_account_id": null,
+				"sub_id": null,
+				"sub_name": null,
+				"matches_primary": null
+			},
+			"customer_goals": null,
+			"overlap_with_primary": ""
+		}
+	],
+	"influenced_pipeline_usd": {
+		"net_new_usd": null,
+		"renewed_arr_usd": null,
+		"grand_total_usd": null,
+		"derivation": "",
+		"note": ""
+	},
+	"conflicts": [],
+	"data_quality_flags": [],
+	"pipeline_stage": {
+		"status": "pre_request | post_request | delivered | needs_input",
+		"request_submitted": false,
+		"missing_fields": [],
+		"recommended_next_step": ""
+	},
+	"tpsc": {
+		"ids": {
+			"tpsaccountid": null,
+			"tpsprojectid": null,
+			"tpsrequestid": null
+		},
+		"account": {
+			"tpsaccountid": null,
+			"accountname": null,
+			"sub_name": null
+		},
+		"project": {
+			"tpsprojectid": null,
+			"primary_opportunity_link": null,
+			"tpsaccountid": null,
+			"accountname": null,
+			"drnumber": null,
+			"opportunityname": null,
+			"salesstage": null,
+			"closedate": null,
+			"closequarter": null,
+			"adjcommit": null,
+			"totalgnarr": null,
+			"povstatus": null,
+			"techcasestatus": null,
+			"techdriver": null,
+			"techdriveremail": null,
+			"techfit": null,
+			"techwin": null,
+			"techriskrating": null,
+			"techriskcategory": null,
+			"techriskcomments": null,
+			"tpsarchdesign": null,
+			"tpsbusinessdriver": null,
+			"projectteam": null,
+			"projectteamemail": null,
+			"projectlastupdate": null,
+			"activity": [],
+			"requests": [],
+			"objectives": null,
+			"use_cases": [],
+			"influenced_pipeline_usd": {
+				"net_new_usd": null,
+				"renewed_arr_usd": null,
+				"grand_total_usd": null,
+				"derivation": "",
+				"note": ""
+			}
+		},
+		"requests": [
+			{
+				"tpsrequestid": null,
+				"tv_request_link": null,
+				"drnumber": null,
+				"requestname": null,
+				"requesttype": null,
+				"requeststage": null,
+				"requeststatus": null,
+				"requesthealth": null,
+				"requestmotion": null,
+				"requestgeo": null,
+				"productfocus": null,
+				"requestlead": null,
+				"requestteam": null,
+				"requestlastupdate": null,
+				"actualcompletiondate": null,
+				"blockerinfo": null,
+				"latestcomment": null,
+				"products_in_scope": [],
+				"timeline": {
+					"proposed_start": null,
+					"proposed_due": null,
+					"dates_flexible": null
+				},
+				"activity": [],
+				"is_primary": false
+			}
+		],
+		"sharepoint": {
+			"countassets": null,
+			"assets": []
+		},
+		"fetched": false,
+		"source": "tps_tv_read_tpsc_opp_detail",
+		"note": ""
+	}
+}
