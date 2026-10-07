@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "context.schema.json",
+  "title": "TPS Central Engagement Context",
+  "description": "Validator contract for get-tps-central-context output (context-<account>.json). This is the plugin-root JSON Schema the deterministic validator checks; reference/context-shape example inside the skill remains the field-by-field shape reference. Enforces that every layer the Step 6 completeness gate requires is present (populated or explicitly null), and that meta carries the version stamps downstream skills fail loudly on.",
+  "type": "object",
+  "required": ["meta", "account", "record_links", "account_firmographics", "opportunity", "pipeline_stage"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["schema_version", "skill_version", "generated_at", "context_scope", "workfront_ids", "anchor"],
+      "properties": {
+        "schema_version": { "enum": ["2.1"] },
+        "skill_version": { "type": "string" },
+        "generated_at": { "type": "string" },
+        "context_scope": { "enum": ["family", "anchor_only"] },
+        "workfront_ids": {
+          "type": "object",
+          "required": ["request_id", "project_id", "program_id"],
+          "properties": {
+            "request_id": { "type": ["string", "null"] },
+            "project_id": { "type": ["string", "null"] },
+            "program_id": { "type": ["string", "null"] }
+          }
+        },
+        "anchor": {
+          "type": "object",
+          "required": ["type", "value"],
+          "properties": {
+            "type": { "enum": ["request_reference", "request_url", "request_id", "opportunity_reference", "opportunity_url", "opportunity_id", "account_lookup", "manual"] },
+            "value": { "type": "string" },
+            "resolved_object_type": { "type": ["string", "null"] },
+            "resolved_guid": { "type": ["string", "null"] },
+            "resolved_reference_number": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "account": { "type": "string" },
+    "record_links": { "type": "object" },
+    "account_firmographics": {
+      "type": "object",
+      "required": ["account_name", "industry"],
+      "properties": {
+        "account_name": { "type": ["string", "null"] },
+        "industry": { "type": ["string", "null"] },
+        "market_area": { "type": ["string", "null"] }
+      }
+    },
+    "opportunity": {
+      "type": "object",
+      "required": ["gnarr", "opportunity_details"],
+      "properties": {
+        "opportunity_details": {
+          "type": "object",
+          "properties": {
+            "business_objectives": { "type": ["array", "null"] },
+            "pains_challenges": { "type": ["array", "null"] },
+            "use_cases": { "type": ["array", "null"] },
+            "success_criteria": { "type": ["string", "array", "null"] }
+          }
+        },
+        "gnarr": {
+          "type": "object",
+          "properties": {
+            "net_new_usd": { "type": ["number", "null"] },
+            "renewed_arr_usd": { "type": ["number", "null"] },
+            "deal_grand_total_usd": { "type": ["number", "null"] }
+          }
+        }
+      }
+    },
+    "pipeline_stage": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["pre_request", "post_request", "delivered", "needs_input"] },
+        "request_submitted": { "type": ["boolean", "null"] }
+      }
+    },
+    "conflicts": { "type": "array" },
+    "data_quality_flags": { "type": "array" }
+  }
+}

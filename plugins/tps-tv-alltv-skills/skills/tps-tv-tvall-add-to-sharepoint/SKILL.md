@@ -2,7 +2,7 @@
 name: tps-tv-tvall-add-to-sharepoint
 description: Attach a file or link to SharePoint for a specific Technical Validation request through an authorized tps-tv-alltv-assist connector. Run only for an explicit attachment request, using supplied or previously gathered context and the connector's upload widget.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   visibility: public
 ---
 
@@ -10,6 +10,13 @@ metadata:
 
 This is an explicit write action, never an automatic follow-up to a context read.
 The connector must enforce authorization independently of plugin installation.
+
+The request detail adapter gets its main Workfront context from
+`get-tps-central-context` in `cxl-workbench-alltv` 1.1.0 or later, then adds
+the TPSC request and SharePoint payload. A raw provider file alone is not an
+upload payload: pass its anchor to request-details for enrichment/shaping.
+Reuse a provider result only during the same invocation. A fully populated
+authorized widget payload still bypasses all reads as before.
 
 ## Workflow
 

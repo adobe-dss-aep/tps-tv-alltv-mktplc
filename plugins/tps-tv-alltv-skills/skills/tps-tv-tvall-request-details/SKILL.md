@@ -1,75 +1,198 @@
 ---
 name: tps-tv-tvall-request-details
-description: Gather structured Technical Validation context for an existing Workfront request, enriched by an authenticated tps-tv-alltv-assist connector. Use for a request URL, reference number, or account lookup resolving to a submitted request. Route pre-request opportunities and portfolio summaries to their dedicated skills.
+description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into post-request TV/AllTV engagement context, enriched with TPSC history and SharePoint metadata. Use for an existing TV request URL/reference, a DR/account with a submitted request, full context before TV artifacts, or context needed for a SharePoint attachment. Known-ID status/widget asks use a lightweight TPSC read and mandatory Workfront freshness checks instead of a full gather. An opportunity-only input goes to tps-tv-tvall-opp-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "1.0.0"
+  version: "2.0.0"
   visibility: public
 ---
 
-# Technical Validation Request Details
+# TPS TV/AllTV Request Details
 
-## Prerequisites and field discovery
+## Responsibility and prerequisites
 
-Use only connected, authorized MCP tools. Do not call Workfront REST endpoints,
-guess tenant IDs, fabricate record URLs, or invent data. If a connector is missing
-or authorization fails, report that limitation before proceeding.
+This skill is a **post-request adapter**, not an independent Workfront context
+gatherer. `cxl-workbench-alltv` 1.1.0 or later must be installed for full context.
+Load its `get-tps-central-context` skill using the host's skill mechanism.
+Do not treat a skill name as an MCP tool or read another plugin through this
+plugin's `${CLAUDE_PLUGIN_ROOT}`. If the provider cannot be loaded, report that
+dependency and request installation; do not substitute the removed full gather.
 
-For a new Workfront session, read the connector's usage documentation with
-`insights_read_docs("mcp-usage")` and list supported entities with
-`insights_list_entities`. Discover fields with `insights_search_fields` and resolve
-their relationship paths with `insights_get_field_paths`. Read the connector's
-conditions, implicit-patterns, status, and date documentation before using the
-corresponding filters. Resolve named accounts, users, and portfolio scope through
-documented lookup tools. Never assume a custom field's ID or relationship path.
-If resolution fails, report the unresolved field; do not substitute a guessed path.
+The provider owns anchor resolution, issue/project extraction, firmographics,
+GNARR, team enrichment, provenance, narrative, conflicts, and validation.
+This skill owns TPSC reads, sibling display eligibility, mandatory same-day
+refresh, adapter shaping, widget presentation, and SharePoint metadata.
+Only narrow ID resolution, sibling validation, and freshness reads are made
+directly through Workfront here; never duplicate the provider's deep gather.
+Read `reference/context-provider.md` for the provider contract and mappings.
+
+TPSC tools are separate from the Workfront MCP. Read tools fetch data only;
+`tps_tv_read_tpsc_request_detail_widget` only displays its `data` argument.
+Uploads are a separate, explicit intent handled by
+`tps-tv-tvall-add-to-sharepoint`, never an automatic action after gathering.
 
 ## Workflow
 
-1. Resolve the anchor request from a supplied URL, numeric reference, or scoped
-   account/name lookup. Ask for clarification if several requests match. Fetch the
-   issue and its parent opportunity project using resolved fields. An opportunity
-   with no request belongs to `tps-tv-tvall-opp-details`.
-2. Once verified `tpsaccountid`, `tpsprojectid`, and `tpsrequestid` values are known,
-   call `tps_tv_read_tpsc_request_detail` before deep Workfront extraction. This is
-   a data read, not a widget display or upload. If Workfront is unavailable, use
-   verified IDs supplied by the user or existing authorized context; never
-   manufacture missing IDs. Identify connector-only results as partial.
-3. Gather authorized request and project data: objectives, use cases, scope,
-   account firmographics, owners, dates, status, risks, and opportunity value.
-   Discover configured custom fields at runtime. Keep net-new ARR, renewed ARR,
-   and their grand total distinct; capture available per-solution values without
-   assuming that missing amounts are zero.
-4. Retain related records only when returned by the detail tool. Do not discover
-   or fetch sibling opportunities independently. Attribute every captured field
-   to its source, expose conflicts, and deduplicate narrative without discarding
-   distinct facts.
-5. Populate `reference/context-schema.json`. Preserve Workfront-sourced values
-   and TPSC data separately rather than silently overwriting one with the other.
-   Use null and a data-quality flag for unavailable fields. Do not store passwords,
-   bearer tokens, or other credentials found in source text or links.
-6. Check returned records for same-day Workfront changes using resolved update
-   fields. Reuse already-refreshed records within the session. Refresh changed
-   fields from Workfront, not by repeatedly calling a potentially cached TPSC
-   read. Only update fields actually returned by the refresh; preserve unrelated
-   history and values.
-7. For widget output, call `tps_tv_read_tpsc_request_detail_widget` separately
-   with the gathered data according to its advertised input schema. Skip this
-   call for conversational output. Report unavailable presentation tools instead
-   of claiming that a widget was displayed.
-8. Write `context-<account-slug>.json` in the user's private working environment
-   and summarize the account, request, opportunity, value, timeline, risks, and
-   quality flags. Do not write generated customer context into this public repo.
+### Step 0: Route the ask and choose presentation
 
-If the user requests a pipeline overview instead of one anchored request, use
-`tps-tv-tvall-my-opp-summary`. SharePoint attachments are a separate, explicit
-write intent handled by `tps-tv-tvall-add-to-sharepoint`; never trigger them
-automatically after a read.
+- A person's open requests/pipeline with no specific deal: hand off to
+  `tps-tv-tvall-my-opp-summary`. Team-roster questions are out of scope; never
+  call `tps_tv_read_direct_reports`.
+- Known `tpsrequestid`, `tpsprojectid`, and `tpsaccountid`, status/widget only:
+  use Step 0b. This does not produce full context or ground a TV artifact.
+- All other anchored full-context asks: use Step 1. Accept a
+  `workfront_request_url`, `workfront_request_reference`, or `account_name`
+  with optional `person_name`; person-only lookup is also passed to the provider.
+  Preserve reference-over-URL precedence and provider disambiguation.
+- An opportunity input with no request goes to `tps-tv-tvall-opp-details`.
 
-## Output templates
+Resolve `useWidget` from the session's explicit preference first (sticky until
+changed), then prior interaction, otherwise false. Never block on this choice.
 
-- `reference/context-schema.json`: empty context shape, not a formal validator.
-- `reference/tpsc-request-details-submission-schema.json`: a reduced submission
-  shape with root-level IDs and a single account, project, and request.
+### Step 0b: Known-ID status/widget fast path
 
-Check the connected tools' current input schemas before sending a payload.
-Do not send the whole working context to a tool that expects a reduced shape.
+1. Call `tps_tv_read_tpsc_request_detail` with the known IDs, silently.
+2. Apply Step 3's sibling filter to the returned projects.
+3. Read and execute `reference/same-day-refresh.md` on every remaining project
+   and every returned request. Request GUIDs are `tpsrequestid`, not the
+   summary tool's `tpscrequestid`. No previous-ask record cache is allowed.
+4. For `useWidget: true`, pass the corrected native payload to
+   `tps_tv_read_tpsc_request_detail_widget` as `data`. Otherwise present it
+   in text. Include checked/refreshed counts and any failure. No file or full
+   gather on this path.
+
+### Step 1: Obtain the main Workfront context
+
+Read and execute `reference/context-provider.md`. Invoke
+`get-tps-central-context` with the original anchor inputs,
+`context_scope: anchor_only`, and `presentation: return_to_caller`.
+For a known issue GUID on a full-context ask, pass `workfront_request_id`.
+If the other adapter already passed a provider result for this same anchor
+during this invocation, validate and consume it rather than invoking again.
+Do not independently search Workfront first or regenerate already-returned
+context layers. Use the provider's same-invocation result as the base.
+
+- `needs_input`: surface the provider's recommended next step; stop.
+- A resolved project without a request: pass the provider result to
+  `tps-tv-tvall-opp-details`, without recursively gathering again.
+- A resolved issue, including a delivered request: continue.
+- Provider error/partial result: report it and retain flags. If confirmed
+  request/project IDs are available, a TPSC-only partial answer is allowed;
+  never label it complete Workfront context. Without IDs, stop and request
+  the missing anchor. A missing provider installation is not an outage fallback.
+
+### Step 2: Fetch TPSC enrichment
+
+Take `tpsrequestid` and `tpsprojectid` from `meta.workfront_ids`.
+Use its confirmed `program_id` for `tpsaccountid` when available. The tool's
+current schema determines which IDs are required. If a required account ID
+is unavailable, report that blocker; do not substitute a project ID as a
+placeholder. Use only verified native IDs and validate any canonical IDs
+returned by the connector against the anchored records.
+
+Call `tps_tv_read_tpsc_request_detail` once with those arguments, silently.
+Preserve its full account/project/request records, history, and SharePoint
+metadata. Normalize only a documented response envelope: request details
+may carry the arrays under `data`; do not invent absent arrays or silently
+treat a malformed response as no records. Report errors or no matching anchor.
+Do not replace TPSC history or SharePoint data with the provider's narrative.
+If enrichment fails, retain usable provider context and explicitly set
+`tpsc.fetched: false`. Do not render a TPSC widget or start an upload with
+fabricated account/project/request objects.
+
+### Step 3: Filter sibling projects and refresh the TPSC snapshot
+
+The primary project is matched by `tpsprojectid`, never by response order.
+Only projects already returned by TPSC are candidates for related projects.
+For other projects, confirm a submitted issue by their `drnumber` using a
+batched issue-rooted filter on the configured deal-reference relationship,
+discovered at runtime. Do not assume a private field label or relationship path.
+Initialize/discover the insights connector and resolve paths as specified in
+`reference/same-day-refresh.md` before querying. Keep the anchor regardless.
+Drop a sibling only after a successful, complete query confirms no issue;
+an unavailable/failed check is unresolved eligibility, not proof of absence.
+Retain unresolved candidates with a warning rather than silently deleting them.
+Never discover additional projects through a Workfront DR list.
+
+Read and execute `reference/same-day-refresh.md` for every surviving project
+and every returned request before assembly or presentation. Today's confirmed
+fields must overwrite the TPSC source objects. A provider context is not a
+replacement for native timestamp checks; only live reads from this same
+invocation may satisfy individual refresh fields.
+
+### Step 4: Shape the request context
+
+Use `reference/context-schema.json` as the adapter shape and the mapping in
+`reference/context-provider.md`. Copy common context layers from the provider;
+preserve nulls, sources, conflicts, team enrichment, and flags. Missing provider
+fields stay null/empty as the shape requires, with an explicit gap flag.
+Do not refetch deep fields to fill them. Keep the provider's `meta` block.
+
+- Set root ID mirrors and `tpsc.ids` from confirmed IDs, not placeholders.
+- `tpsc.account`: the matching complete TPSC account, plus provider
+  `account_firmographics.sub_name`.
+- `tpsc.project`: the matching complete, freshness-corrected TPSC project,
+  plus `primary_opportunity_link` from provider `record_links`,
+  request-level `objectives`, `use_cases`, and the scoped
+  `influenced_pipeline_usd`. Leave unrelated TPSC-native fields intact.
+- `tpsc.requests`: primary request first, matched by `tpsrequestid`, with
+  `is_primary: true`, provider `tv_request_link`, `products_in_scope`, and
+  `timeline`. Preserve every native field and that request's activity.
+  Lift its `sharepoint` object to `tpsc.sharepoint` in the file only.
+- Append returned secondary requests whose type is Hands-on Lab (all
+  onsite/1:1/virtual variants), Custom Demo, or POC, case-insensitive and
+  prefix-tolerant. Set `is_primary: false`; their Workfront-only
+  `tv_request_link`, `products_in_scope`, and `timeline` stay null.
+  Do not borrow primary fields or history. Bootcamp remains excluded for
+  secondary entries, not for the primary request.
+- Build `linked_opportunities` from surviving TPSC siblings only, with their
+  native IDs/name/DR, `tpsaccountid`, and confirmed issue ID when unambiguous.
+  If multiple issues match, do not pick one. This is a shallow related list,
+  not a request to gather sibling deep context. Cross-check the provider's
+  additional-opportunities signal against it and surface discrepancies.
+- The provider's anchor-only GNARR rollup is not a full family rollup.
+  Use its primary values; if siblings lack separate confirmed net-new and
+  renewal values, flag incomplete family totals and state the primary-only
+  scope in `influenced_pipeline_usd.note`. Never split TPSC `totalgnarr` by
+  guessing, or present it as verified net-new GNARR.
+
+Keep `tpsc.fetched`, `source`, and `note` explicit, including the provider
+file path, refresh result, and any partial/outage status. An unavailable
+SharePoint list is unknown: flag it; an empty list is confirmed only when
+returned as empty. Do not claim zero assets based on a failed read.
+
+### Step 5: Validate shape, write, and present
+
+Verify the anchored IDs, provider schema 2.1, attempted context layers, primary
+request selection, TPSC enrichment, and refresh result before output.
+Do not overwrite the provider's source file. Write the adapted
+`context-<account>.json` separately (the existing adapter output location),
+with the account slug lowercased, spaces hyphenated, punctuation dropped.
+Write only in the user's private working environment, never in this public
+checkout. Redact source credentials and do not publish tool responses,
+customer records, user identities, or uploads.
+
+For a widget, shape `data` as `{ requests, projects, accounts }`:
+`requests` is the adapted `tpsc.requests`, `projects` contains the adapted
+primary plus surviving related TPSC projects, and `accounts` retains the
+matching TPSC accounts. Reattach `tpsc.sharepoint` to a copy of the primary
+request for this widget; keep it lifted in the written context.
+Never drop activity, rebuild native records from a partial field list, or send
+the unrefreshed response. The widget is the answer; add only a short pointer,
+freshness result, and important warnings.
+
+Without a widget, synthesize account, offering, net-new value (renewal
+separately), objectives/use cases, relevant status, request count, conflicts,
+and unresolved/partial data. Do not dump JSON when the file is available.
+For upload follow-ups, pass this adapted context to
+`tps-tv-tvall-add-to-sharepoint`; a raw provider context alone is insufficient.
+
+## Resources
+
+- `reference/context-provider.md`: mandatory provider invocation and mapping.
+- `reference/same-day-refresh.md`: mandatory refresh, fast or full path.
+- `reference/context-schema.json`: adapted output shape, not provider input.
+- `reference/tpsc-request-details-submission-schema.json`: narrower single
+  request submission shape; no activity, `is_primary`, or SharePoint object.
+  Keep its copy in the upload skill aligned.
+- No private field maps, dictionaries, customer examples, or tenant
+  configuration ship here. The provider owns runtime deep-field discovery.

@@ -8,7 +8,12 @@
     {
       "name": "tps-tv-alltv-skills",
       "source": "./plugins/tps-tv-alltv-skills",
-      "description": "Technical-validation skills for request and opportunity context, pipeline summaries, and explicitly requested SharePoint attachments."
+      "description": "Public-safe TV/AllTV adapters over get-tps-central-context, plus TPSC enrichment, pipeline summaries, and explicit SharePoint attachments. Full context requires cxl-workbench-alltv 1.1.0 or later."
+    },
+    {
+      "name": "cxl-workbench-alltv",
+      "source": "./plugins/cxl-workbench-alltv",
+      "description": "Public-safe Workfront context provider with one extraction agent, empty context contracts, and a Python validator. Requires authorized connectors and runtime field discovery."
     }
   ]
 }

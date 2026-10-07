@@ -1,4 +1,22 @@
 {
+	"meta": {
+		"schema_version": "2.1",
+		"skill_version": "2.3",
+		"generated_at": "",
+		"context_scope": "anchor_only",
+		"workfront_ids": {
+			"request_id": null,
+			"project_id": null,
+			"program_id": null
+		},
+		"anchor": {
+			"type": null,
+			"value": "",
+			"resolved_object_type": null,
+			"resolved_guid": null,
+			"resolved_reference_number": null
+		}
+	},
 	"tpsaccountid": null,
 	"tpsprojectid": null,
 	"tpsrequestid": null,
@@ -264,37 +282,9 @@
 				"note": ""
 			}
 		},
-		"requests": [
-			{
-				"tpsrequestid": null,
-				"tv_request_link": null,
-				"drnumber": null,
-				"requestname": null,
-				"requesttype": null,
-				"requeststage": null,
-				"requeststatus": null,
-				"requesthealth": null,
-				"requestmotion": null,
-				"requestgeo": null,
-				"productfocus": null,
-				"requestlead": null,
-				"requestteam": null,
-				"requestlastupdate": null,
-				"actualcompletiondate": null,
-				"blockerinfo": null,
-				"latestcomment": null,
-				"products_in_scope": [],
-				"timeline": {
-					"proposed_start": null,
-					"proposed_due": null,
-					"dates_flexible": null
-				},
-				"activity": [],
-				"is_primary": false
-			}
-		],
+		"requests": [],
 		"sharepoint": {
-			"countassets": null,
+			"countassets": 0,
 			"assets": []
 		},
 		"fetched": false,
