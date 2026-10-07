@@ -1,5 +1,6 @@
 import json
 import pathlib
+import re
 import unittest
 
 
@@ -109,6 +110,35 @@ class SkillWorkflowContractTests(unittest.TestCase):
                 self.assertNotIn("presentationPreference", shape["tpsc"])
                 self.assertNotIn("presentationPreference", shape["meta"])
         self.assertIn("not in the provider source or widget `data`", self.preference)
+
+
+    def test_detail_references_are_adapter_only(self):
+        shared = {
+            "context-provider.md",
+            "context-schema.json",
+            "same-day-refresh.md",
+            "widget-preference.md",
+        }
+        for name in READ_SKILLS[1:]:
+            with self.subTest(skill=name):
+                expected = set(shared)
+                if name == "tps-tv-tvall-request-details":
+                    expected.add("tpsc-request-details-submission-schema.json")
+                reference = SKILLS / name / "reference"
+                self.assertEqual(
+                    {path.name for path in reference.iterdir()}, expected
+                )
+                for resource in re.findall(
+                    r"`(reference/[a-zA-Z0-9_.-]+)`", skill_text(name)
+                ):
+                    self.assertTrue((SKILLS / name / resource).is_file(), resource)
+                self.assertIn("not an extraction", skill_text(name))
+
+    def test_request_upload_submission_copies_match(self):
+        filename = "tpsc-request-details-submission-schema.json"
+        request = SKILLS / "tps-tv-tvall-request-details" / "reference" / filename
+        upload = SKILLS / "tps-tv-tvall-add-to-sharepoint" / "reference" / filename
+        self.assertEqual(request.read_bytes(), upload.read_bytes())
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ under `plugins/`; this repository remains a **marketplace**.
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.1.0** and `cxl-workbench-alltv` **1.1.0**
+**both** `tps-tv-alltv-skills` **2.1.1** and `cxl-workbench-alltv` **1.1.0**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -42,6 +42,14 @@ owns anchor resolution, deep fields, people enrichment, provenance, conflicts,
 and validation. The adapters shape that result into their existing request/
 opportunity contracts, separately adding TPSC-native data and presentation.
 They do not restore a duplicate deep gather if the provider is missing.
+
+Request details retains five runtime references; opportunity details retains
+four. These cover provider invocation/mapping, the adapter output template,
+same-day refresh, widget preference, and (request only) the upload submission
+shape. The templates remain complete for output compatibility, but their common
+fields are copied from the provider, not independently gathered. Deep-field
+discovery belongs to the provider; no legacy gathering maps, dictionaries, or
+populated examples are packaged in the detail skills.
 
 The provider defaults to `family` scope for standalone use, using only
 documented authorized relationships. It accepts typed native IDs without

@@ -2,7 +2,7 @@
 name: tps-tv-tvall-opp-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into pre-request opportunity context, enriched with TPSC project data. Use for an opportunity URL/reference, account-plus-owner lookup, manual pre-request context, or a known project's status/widget. Full context uses the provider; known-ID status/widget delivery remains valid even when requests exist and uses TPSC plus mandatory Workfront freshness checks. An issue input goes to tps-tv-tvall-request-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.0.1"
+  version: "2.0.2"
   visibility: public
 ---
 
@@ -179,5 +179,8 @@ No upload, direct-reports lookup, or additional deep gather afterward.
 - `reference/widget-preference.md`: mandatory session preference/handoff gate.
 - `reference/same-day-refresh.md`: mandatory refresh on fast and full paths.
 - `reference/context-schema.json`: adapted opportunity output shape.
+- The local schema is an output template, not an extraction guide. Copy common
+  layers from the provider and add the adapter enrichment; do not use template
+  fields as instructions for a second deep gather.
 - No private field maps, dictionaries, customer examples, or tenant
   configuration ship here. The provider owns runtime deep-field discovery.
