@@ -2,7 +2,7 @@
 name: tps-tv-tvall-opp-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into pre-request opportunity context, enriched with TPSC project data. Use for an opportunity URL/reference, account-plus-owner lookup, manual pre-request context, or a known project's status/widget. Full context uses the provider; known-ID status/widget delivery remains valid even when requests exist and uses TPSC plus mandatory Workfront freshness checks. An issue input goes to tps-tv-tvall-request-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   visibility: public
 ---
 
@@ -31,8 +31,11 @@ No portfolio gather or upload here; route pipeline asks to
 
 ### Step 0: Choose presentation and route
 
-Resolve `useWidget` from explicit session preference, then prior interaction,
-otherwise false; never block on a preference question.
+Read and execute `reference/widget-preference.md` before routing. Recover
+the conversation's `presentationPreference.useWidget`, including explicit
+false, and inherit it on follow-ups. Pass that setting on logical handoffs;
+do not re-default true to false when switching from summary/request details.
+Provider `presentation: return_to_caller` does not change the user's boolean.
 
 If `tpsprojectid` and `tpsaccountid` are known and the ask is status/widget only,
 use Step 0b. Otherwise use Step 1 for full context or anchor resolution.
@@ -50,6 +53,9 @@ use Step 0b. Otherwise use Step 1 for full context or anchor resolution.
    `tps_tv_read_tpsc_opp_detail_widget` only when `useWidget` is true;
    otherwise present in text. Include freshness counts/failures.
    No full gather or context file on this path.
+   Immediately before output, reread `reference/widget-preference.md` and
+   verify the latest resolved boolean. Report unavailable widgets explicitly
+   without silently changing the preference.
 
 ### Step 1: Obtain the main Workfront context
 
@@ -62,8 +68,9 @@ If the other adapter already passed a provider result for this same anchor
 during this invocation, validate and consume it rather than invoking again.
 Do not perform an independent Workfront lookup or extraction first.
 
-If the provider resolves an issue, pass the same-invocation result to
-`tps-tv-tvall-request-details`; do not recursively gather it again.
+If the provider resolves an issue, pass the same-invocation result and
+`presentationPreference` to `tps-tv-tvall-request-details`; do not recursively
+gather it again.
 For `needs_input`, surface the provider's recommended next step and stop.
 A manual result is an unverified partial, with no invented IDs or TPSC fetch.
 An existing request in a TPSC project snapshot does not reclassify a provider
@@ -112,6 +119,8 @@ replace the native timestamp gate.
 Map common provider layers using `reference/context-provider.md` into
 `reference/context-schema.json`. Retain provider `meta`, nulls, provenance,
 team enrichment, conflicts, and flags; never refetch missing deep fields.
+Store resolved `presentationPreference` in the adapted file, not the provider
+source or widget `data`. A missing boolean in provider output is not a reset.
 The provider's anchor-only result has no discovered siblings; keep deep
 `linked_opportunities` empty rather than manufacturing sibling context.
 
@@ -139,6 +148,11 @@ not called with fabricated objects.
 
 ### Step 5: Validate, write, and present
 
+Read and execute `reference/widget-preference.md` again after provider/shaping
+work and before text/widget output. Recover the latest explicit choice rather
+than a new default. True requires the opportunity widget; false requires text.
+Any widget failure is an explicit labeled fallback, not a preference change.
+
 Verify provider schema 2.1, common-layer mappings, confirmed IDs when available,
 the TPSC anchor match, preserved array nesting, and refresh result.
 Write `opp-context-<account>.json`, with the account slug lowercased, spaces
@@ -162,6 +176,7 @@ No upload, direct-reports lookup, or additional deep gather afterward.
 ## Resources
 
 - `reference/context-provider.md`: mandatory provider invocation and mapping.
+- `reference/widget-preference.md`: mandatory session preference/handoff gate.
 - `reference/same-day-refresh.md`: mandatory refresh on fast and full paths.
 - `reference/context-schema.json`: adapted opportunity output shape.
 - No private field maps, dictionaries, customer examples, or tenant

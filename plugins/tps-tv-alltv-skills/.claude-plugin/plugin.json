@@ -1,6 +1,6 @@
 {
   "name": "tps-tv-alltv-skills",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Public-safe TV/AllTV adapters using cxl-workbench-alltv's get-tps-central-context for full request/opportunity context, plus TPSC enrichment, mandatory per-ask freshness checks, pipeline summaries, and explicit SharePoint attachments. Requires user-configured authorized connectors.",
   "author": {
     "name": "adobe-dss-aep",

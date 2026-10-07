@@ -2,7 +2,7 @@
 name: tps-tv-tvall-request-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into post-request TV/AllTV engagement context, enriched with TPSC history and SharePoint metadata. Use for an existing TV request URL/reference, a DR/account with a submitted request, full context before TV artifacts, or context needed for a SharePoint attachment. Known-ID status/widget asks use a lightweight TPSC read and mandatory Workfront freshness checks instead of a full gather. An opportunity-only input goes to tps-tv-tvall-opp-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   visibility: public
 ---
 
@@ -34,6 +34,11 @@ Uploads are a separate, explicit intent handled by
 
 ### Step 0: Route the ask and choose presentation
 
+Read and execute `reference/widget-preference.md` **before routing**. Recover
+the conversation's `presentationPreference.useWidget`, including an explicit
+false. A follow-up inherits the resolved boolean; do not ask again or default
+true back to false. Pass `presentationPreference` on any logical skill handoff.
+
 - A person's open requests/pipeline with no specific deal: hand off to
   `tps-tv-tvall-my-opp-summary`. Team-roster questions are out of scope; never
   call `tps_tv_read_direct_reports`.
@@ -45,8 +50,9 @@ Uploads are a separate, explicit intent handled by
   Preserve reference-over-URL precedence and provider disambiguation.
 - An opportunity input with no request goes to `tps-tv-tvall-opp-details`.
 
-Resolve `useWidget` from the session's explicit preference first (sticky until
-changed), then prior interaction, otherwise false. Never block on this choice.
+Resolve a default only when no earlier choice/state exists, as the shared
+procedure specifies. Provider `presentation: return_to_caller` is independent
+of `useWidget`; do not reinterpret it as conversational preference.
 
 ### Step 0b: Known-ID status/widget fast path
 
@@ -59,6 +65,9 @@ changed), then prior interaction, otherwise false. Never block on this choice.
    `tps_tv_read_tpsc_request_detail_widget` as `data`. Otherwise present it
    in text. Include checked/refreshed counts and any failure. No file or full
    gather on this path.
+   Immediately before output, reread `reference/widget-preference.md` and
+   verify the latest resolved boolean. Report a failed widget as a presentation
+   limitation, never silently change the preference.
 
 ### Step 1: Obtain the main Workfront context
 
@@ -73,7 +82,8 @@ context layers. Use the provider's same-invocation result as the base.
 
 - `needs_input`: surface the provider's recommended next step; stop.
 - A resolved project without a request: pass the provider result to
-  `tps-tv-tvall-opp-details`, without recursively gathering again.
+  `tps-tv-tvall-opp-details` with `presentationPreference`, without recursively
+  gathering again.
 - A resolved issue, including a delivered request: continue.
 - Provider error/partial result: report it and retain flags. If confirmed
   request/project IDs are available, a TPSC-only partial answer is allowed;
@@ -126,6 +136,9 @@ Use `reference/context-schema.json` as the adapter shape and the mapping in
 preserve nulls, sources, conflicts, team enrichment, and flags. Missing provider
 fields stay null/empty as the shape requires, with an explicit gap flag.
 Do not refetch deep fields to fill them. Keep the provider's `meta` block.
+Store the resolved `presentationPreference` in the adapted file, separately
+from the provider metadata and TPSC widget payload. Missing provider `useWidget`
+does not erase that setting.
 
 - Set root ID mirrors and `tpsc.ids` from confirmed IDs, not placeholders.
 - `tpsc.account`: the matching complete TPSC account, plus provider
@@ -162,6 +175,11 @@ returned as empty. Do not claim zero assets based on a failed read.
 
 ### Step 5: Validate shape, write, and present
 
+Read and execute `reference/widget-preference.md` again after provider/shaping
+work and before text/widget output. Recover the user's latest choice rather
+than re-defaulting. True requires the request widget; false requires text.
+A widget failure is an explicit labeled fallback, not a preference change.
+
 Verify the anchored IDs, provider schema 2.1, attempted context layers, primary
 request selection, TPSC enrichment, and refresh result before output.
 Do not overwrite the provider's source file. Write the adapted
@@ -189,6 +207,7 @@ For upload follow-ups, pass this adapted context to
 ## Resources
 
 - `reference/context-provider.md`: mandatory provider invocation and mapping.
+- `reference/widget-preference.md`: mandatory session preference/handoff gate.
 - `reference/same-day-refresh.md`: mandatory refresh, fast or full path.
 - `reference/context-schema.json`: adapted output shape, not provider input.
 - `reference/tpsc-request-details-submission-schema.json`: narrower single

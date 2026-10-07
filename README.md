@@ -18,7 +18,7 @@ under `plugins/`; this repository remains a **marketplace**.
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.0.0** and `cxl-workbench-alltv` **1.1.0**
+**both** `tps-tv-alltv-skills` **2.1.0** and `cxl-workbench-alltv` **1.1.0**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -58,6 +58,18 @@ full-context follow-up through a detail adapter. Uploads use a complete supplied
 payload directly, or get the request adapter's enriched output. A raw provider
 file is not a widget or upload payload.
 
+When the pipeline summary starts a conversation with no presentation preference,
+it briefly explains interactive widgets versus conversational text and asks
+once before fetching data. The chosen boolean is carried across summary,
+request, and opportunity follow-ups, including provider returns and adapter
+handoffs. Explicit true and false remain sticky until the user changes them;
+an upload widget or a data-only tool response does not change that setting.
+
+The summary has an inline execution/completion gate: nonempty issue/project
+collections require actual native timestamp tool calls, and today's records
+require corrected fields or explicit partial failures before either text or
+widget output. A brief checked/refreshed count exposes whether the checks ran.
+
 ## Public distribution scope
 
 This is a new, public-safe distribution with fresh Git history. It contains
@@ -95,6 +107,7 @@ marketplace checkout:
 
 ```text
 python -m unittest discover -s plugins/cxl-workbench-alltv/tests -p "test_*.py"
+python -m unittest discover -s plugins/tps-tv-alltv-skills/tests -p "test_*.py"
 ```
 
 Structural tests do not validate live connector execution. After updating
