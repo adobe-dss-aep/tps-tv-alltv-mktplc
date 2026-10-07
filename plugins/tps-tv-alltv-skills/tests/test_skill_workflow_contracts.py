@@ -47,6 +47,51 @@ class SkillWorkflowContractTests(unittest.TestCase):
         self.assertIn("actual tool results", self.summary)
         self.assertIn("unrefreshed/partially refreshed TPSC snapshot", self.summary)
 
+    def test_summary_discovers_workfront_before_tpsc_fetch(self):
+        discovery = self.summary.index("## Step 0a: Discover Workfront")
+        fetch = self.summary.index("## Step 1: Fetch")
+        self.assertLess(discovery, fetch)
+        phase = self.summary[discovery:fetch]
+        for tool in (
+            "insights_read_docs", "insights_list_entities",
+            "insights_search_fields", "insights_get_field_paths",
+            "insights_find_workfront_data",
+        ):
+            self.assertIn(tool, phase)
+        self.assertIn("server namespaces", phase)
+        self.assertIn("does not discover the separate Workfront", self.summary)
+        self.assertIn('enrichment "optional"', self.summary)
+
+    def test_summary_refresh_phase_is_self_contained(self):
+        checks = self.summary.index("## Step 2: Mandatory native timestamp calls")
+        refresh = self.summary.index("## Step 3: Refresh records changed today")
+        gate = self.summary.index("## Step 4: Completion gate")
+        for document in ("mcp-usage", "conditions", "implicit-patterns", "dates"):
+            self.assertIn(document, self.summary[checks:refresh])
+        phase = self.summary[refresh:gate]
+        self.assertIn("insights_find_workfront_data", phase)
+        self.assertIn("issue-rooted", phase)
+        self.assertIn("project-rooted", phase)
+        self.assertIn("lastUpdateDate", phase)
+        for field in (
+            "requeststage", "requesthealth", "blockerinfo", "latestcomment",
+            "techcasestatus", "techriskcomments",
+        ):
+            self.assertIn(field, phase)
+        self.assertIn("not a delegated execution step", self.summary)
+
+    def test_summary_checks_large_portfolios_and_reports_query_evidence(self):
+        self.assertIn("No project-count cutoff", self.summary)
+        self.assertIn("Do not sample", self.summary)
+        self.assertIn("skip project-only entries", self.summary)
+        self.assertIn("report the unchecked counts", self.summary)
+        gate = self.summary[self.summary.index("## Step 4: Completion gate"):]
+        self.assertIn("Workfront freshness", gate)
+        self.assertIn("timestamp-query", gate)
+        self.assertIn("field-refresh-query", gate)
+        self.assertIn("missing-ID entries", gate)
+        self.assertIn("this invocation's evidence", gate)
+
     def test_summary_onboarding_precedes_data_fetch(self):
         self.assertLess(
             self.summary.index("## Step 0: Resolve presentation"),

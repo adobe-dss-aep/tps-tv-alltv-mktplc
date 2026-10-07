@@ -18,7 +18,7 @@ under `plugins/`; this repository remains a **marketplace**.
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.1.1** and `cxl-workbench-alltv` **1.1.0**
+**both** `tps-tv-alltv-skills` **2.2.0** and `cxl-workbench-alltv` **1.1.0**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -76,7 +76,19 @@ an upload widget or a data-only tool response does not change that setting.
 The summary has an inline execution/completion gate: nonempty issue/project
 collections require actual native timestamp tool calls, and today's records
 require corrected fields or explicit partial failures before either text or
-widget output. A brief checked/refreshed count exposes whether the checks ran.
+widget output. Its self-contained Workfront phase discovers the separate
+Workfront tools before the TPSC read, initializes the insights session, and
+explicitly calls native timestamp queries followed by field-refresh queries
+for records changed today. Generic widget descriptions that call enrichment
+optional do not bypass this phase.
+
+There is no project-count cutoff: every returned request/project is checked,
+using deduplicated IDs, documented batch limits, and complete pagination.
+Large portfolios may take longer. An actual execution limit is reported with
+unchecked counts rather than silently skipping records. The phase is isolated
+so a later performance release can remove it deliberately; it is mandatory now.
+A Workfront freshness line reports checked/refreshed/unresolved counts and
+actual timestamp-query and field-refresh-query call counts for this invocation.
 
 ## Public distribution scope
 
