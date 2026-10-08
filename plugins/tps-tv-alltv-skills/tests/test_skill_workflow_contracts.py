@@ -26,6 +26,34 @@ class SkillWorkflowContractTests(unittest.TestCase):
             SKILLS / READ_SKILLS[0] / "reference" / "widget-preference.md"
         ).read_text(encoding="utf-8")
 
+    def test_my_team_is_a_standalone_widget_skill(self):
+        text = skill_text("tps-tv-alltv-my-team")
+        self.assertIn("name: tps-tv-alltv-my-team\n", text)
+        self.assertIn("# My Team", text)
+        self.assertIn("`tps-tv-myteam` is the widget's name", text)
+        self.assertIn("renders the widget in one call", text)
+        self.assertIn("Call once per new ask", text)
+        self.assertIn("empty argument object `{}`", text)
+        self.assertIn("advertised schema", text)
+        self.assertNotIn("reference/", text)
+
+    def test_my_team_preserves_identity_and_other_readout_preferences(self):
+        text = skill_text("tps-tv-alltv-my-team")
+        self.assertIn("Omit `displayName` and `email`", text)
+        self.assertIn("testing-only identity overrides", text)
+        self.assertIn("only\n   opens the signed-in user's team", text)
+        self.assertIn("not overwrite `presentationPreference.useWidget`", text)
+        self.assertIn("errors explicitly", text)
+        self.assertIn("not a successful\n   widget display", text)
+
+    def test_my_team_does_not_gather_member_pipelines(self):
+        text = skill_text("tps-tv-alltv-my-team")
+        self.assertIn("Do not call `tps_tv_read_tpsc_user_summary`", text)
+        self.assertIn("does not require the CXL context provider", text)
+        self.assertIn("or run the summary refresh phase", text)
+        self.assertIn("subsequent person's pipeline request", text)
+        self.assertIn("`tps-tv-tvall-my-opp-summary`", text)
+
     def test_summary_checks_native_timestamps_before_presenting(self):
         checks = self.summary.index("## Step 2: Mandatory native timestamp calls")
         refresh = self.summary.index("## Step 3: Refresh records changed today")

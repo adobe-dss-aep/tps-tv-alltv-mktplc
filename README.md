@@ -12,13 +12,14 @@ under `plugins/`; this repository remains a **marketplace**.
   enriching it with TPSC history and SharePoint metadata.
 - `tps-tv-tvall-opp-details`: adapt provider context for a pre-request opportunity.
 - `tps-tv-tvall-my-opp-summary`: summarize the current user's or a named user's pipeline.
+- `tps-tv-alltv-my-team`: open the signed-in user's `tps-tv-myteam` interactive widget through `tps_tv_read_direct_reports`, without gathering team pipelines or Workfront context.
 - `tps-tv-tvall-add-to-sharepoint`: attach an asset only when explicitly requested.
 
 ## Installation and prerequisites
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.2.0** and `cxl-workbench-alltv` **1.1.0**
+**both** `tps-tv-alltv-skills` **2.3.0** and `cxl-workbench-alltv` **1.1.0**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -35,6 +36,12 @@ connected Workfront toolset rather than using tenant-specific identifiers. Missi
 connectors, inaccessible records, and unresolved fields must be reported explicitly.
 
 ## Shared provider and freshness
+
+My Team is a standalone roster widget and needs only the authorized TPSC
+connector, not the CXL provider or Workfront. It uses the signed-in identity
+without testing overrides and preserves the saved widget/text preference for
+other readouts. Its skill identifier is `tps-tv-alltv-my-team`; its readable
+heading is **My Team**. There is no standard separate skill display-name field.
 
 The detail skills invoke the installed `get-tps-central-context` skill with
 `context_scope: anchor_only` and `presentation: return_to_caller`. The provider

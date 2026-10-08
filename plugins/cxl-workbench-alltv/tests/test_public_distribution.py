@@ -24,7 +24,8 @@ class PublicDistributionTests(unittest.TestCase):
 
     def test_skills_are_public_and_local_references_exist(self):
         skills = list((ROOT / "plugins").glob("*/skills/*/SKILL.md"))
-        self.assertEqual(len(skills), 5)
+        self.assertEqual(len(skills), 6)
+        self.assertIn("tps-tv-alltv-my-team", {skill.parent.name for skill in skills})
         for skill in skills:
             with self.subTest(skill=skill.parent.name):
                 text = skill.read_text(encoding="utf-8")
