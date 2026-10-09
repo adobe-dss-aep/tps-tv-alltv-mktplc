@@ -7,6 +7,10 @@ anchor_only`; reject other combinations before querying.
 
 ## Query boundary
 
+Use `reference/native-id-dictionary.md` for known native IDs and connector paths.
+Do not rediscover which object a TPSC ID identifies or repeat a known ID-path
+lookup. Resolve only missing connector syntax and required custom fields.
+
 Resolve the anchor with only native ID/type, reference/name needed for
 disambiguation, parent project ID, and program ID. For reduced enrichment,
 use explicit field selection through the connector's documented query schema.

@@ -23,9 +23,11 @@ not silently counted as an empty collection.
 
 Discover the authorized Workfront tools through the host's tool mechanism.
 Initialize a new insights session with usage docs and entities; read filter
-and date documentation before building queries. Resolve each entity's native
-ID and native last-update timestamp through field search/path resolution.
-Do not assume a private mapping, raw API field name, or relation path.
+and date documentation before building queries. Read `reference/native-id-dictionary.md`;
+the TPSC/native ID mapping is fixed, not a field-discovery task. Reuse known
+connector ID paths (insights projects use `project.project_ID`). Resolve missing
+native-ID connector syntax once per session/root, and resolve timestamp/custom
+paths separately when absent. Do not guess issue/program paths or private mappings.
 Report tool discovery, authorization, resolution, and query errors explicitly.
 
 On **every new ask**, batch issue and project reads for native ID plus update

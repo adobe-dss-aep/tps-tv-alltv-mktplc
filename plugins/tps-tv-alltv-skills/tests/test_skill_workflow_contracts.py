@@ -192,6 +192,7 @@ class SkillWorkflowContractTests(unittest.TestCase):
             "same-day-refresh.md",
             "widget-preference.md",
             "widget-mapping.md",
+            "native-id-dictionary.md",
         }
         for name in READ_SKILLS[1:]:
             with self.subTest(skill=name):
@@ -218,6 +219,30 @@ class SkillWorkflowContractTests(unittest.TestCase):
                 self.assertIn("Read and execute `reference/widget-mapping.md`", text)
                 self.assertIn("meta.enrichment_fields", text)
                 self.assertIn("template nulls/empties never", text)
+
+    def test_native_id_dictionary_is_shared_and_loaded_before_reads(self):
+        provider = ROOT.parent / "cxl-workbench-alltv" / "skills" / "get-tps-central-context"
+        dictionary = (provider / "reference" / "native-id-dictionary.md").read_bytes()
+        for name in READ_SKILLS:
+            with self.subTest(skill=name):
+                self.assertEqual(
+                    (SKILLS / name / "reference" / "native-id-dictionary.md").read_bytes(),
+                    dictionary,
+                )
+                self.assertIn("reference/native-id-dictionary.md", skill_text(name))
+        text = dictionary.decode("utf-8")
+        for mapping in (
+            "| `tpsrequestid` | `issue.id` |",
+            "| `tpsprojectid` | `project.id` |",
+            "| `tpsaccountid` | `program.id` |",
+        ):
+            self.assertIn(mapping, text)
+        self.assertIn("tpscrequestid", text)
+        self.assertIn("project.project_ID", text)
+        self.assertIn("No exact issue/program connector field IDs", text)
+        self.assertIn("once per session/root", " ".join(text.split()))
+        self.assertIn('{"value": "<native ID>"}', text)
+        self.assertIn("reference/native-id-dictionary.md", (provider / "SKILL.md").read_text(encoding="utf-8"))
 
     def test_request_upload_submission_copies_match(self):
         filename = "tpsc-request-details-submission-schema.json"

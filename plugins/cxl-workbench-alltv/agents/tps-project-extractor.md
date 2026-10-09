@@ -11,6 +11,9 @@ another object, call Workfront REST, guess fields or tenant IDs, or dispatch
 another agent.
 
 Follow the connector's documented initialization and field/path resolution.
+The main skill supplies the native identity dictionary and known connector
+paths. Native issue/project/program IDs are already resolved values; do not
+search for custom TPSC ID fields or rediscover known native-ID paths.
 Use authorized structured summaries when available, otherwise query resolved
 fields. Return only the structured fragment, native object ID/type, sources,
 and data-quality flags. Do not narrate or write generated data into the plugin.

@@ -2,7 +2,7 @@
 name: get-tps-central-context
 description: Gather authorized Workfront opportunity or request context for Technical Validation. Accept URLs, references, confirmed native GUIDs, scoped account/person lookups, or manual input. Produce a validated structured context with provenance, conflicts, distinct net-new/renewal amounts, and explicit gaps. Acts as the required full-context provider for the TV/AllTV request and opportunity adapters; it does not fetch TPSC widget/history/SharePoint payloads.
 metadata:
-  version: "2.4.0"
+  version: "2.4.1"
   visibility: public
 ---
 
@@ -44,6 +44,11 @@ The caller reads that file and owns the final use-case presentation. Ask for
 anchor disambiguation when necessary even in this mode.
 
 ## Step 1: Discover the authorized connector
+
+Read `reference/native-id-dictionary.md` before native-ID queries. TPSC IDs
+already are Workfront issue/project/program IDs; do not rediscover their meaning.
+Reuse known connector paths, including insights `project.project_ID`; only
+resolve missing connector syntax, not a custom TPSC-to-Workfront ID mapping.
 
 Discover and load the connected Workfront tools through the host's supported
 tool mechanism. Read usage documentation and list entities in a new session.

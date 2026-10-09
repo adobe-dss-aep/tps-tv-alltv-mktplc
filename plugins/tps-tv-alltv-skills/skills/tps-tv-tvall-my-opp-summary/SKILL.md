@@ -2,7 +2,7 @@
 name: tps-tv-tvall-my-opp-summary
 description: Summarize the signed-in user's or a named colleague's TV/AllTV pipeline through tps_tv_read_tpsc_user_summary, then perform mandatory batched native Workfront timestamp checks and same-day field refresh before text or widget output. Never present the TPSC snapshot as refreshed without actual Workfront reads. At the start of a conversation with no presentation preference, briefly offer interactive widgets or conversational text and ask once. Preserve that useWidget boolean on all follow-up request/opportunity handoffs. This is a lightweight portfolio roster, not a full context gather per row.
 metadata:
-  version: "1.3.0"
+  version: "1.3.1"
   visibility: public
 ---
 
@@ -34,6 +34,10 @@ pipeline target for resumption. An explicit preference in the original ask skips
 the question. Do not re-ask or reset the boolean on subsequent summary/details.
 
 ## Step 0a: Discover Workfront before the TPSC read
+
+Read `reference/native-id-dictionary.md`. Summary `tpscrequestid` equals
+`issue.id`; `tpsprojectid` equals `project.id`, and `tpsaccountid` equals
+`program.id`. Do not search for custom TPSC ID fields.
 
 Use the host's tool-discovery mechanism with a separate Workfront-specific
 search, such as `Adobe Workfront insights insights_find_workfront_data`.
@@ -83,9 +87,12 @@ supporting documentation, not a delegated execution step.
    `insights_list_entities`. Read `conditions` and `implicit-patterns` before
    constructing filters, and `dates` before interpreting timestamps.
    Successfully initialized documentation/metadata may be reused in-session.
-3. Call `insights_search_fields` and `insights_get_field_paths` to resolve the
-   native ID and `lastUpdateDate` for each nonempty root: `issue` for requests,
-   `project` for projects. Prefer direct paths (`backlinks: 0` where supported).
+3. Use known native-ID paths from the dictionary/current session directly,
+   including `project.project_ID` for insights projects. Resolve only missing
+   issue-ID connector syntax once. Resolve `lastUpdateDate` separately with
+   `insights_search_fields`/`insights_get_field_paths` when not already known.
+   Roots are `issue` for requests and `project` for projects. Prefer direct
+   paths (`backlinks: 0` where supported).
    Use each tool's advertised schema; never invent argument names or paths.
    Do this before custom refresh-field discovery; ambiguity in a status mapping
    must not prevent timestamp checks.

@@ -47,6 +47,10 @@ errors, conflicts, sources, and `data_quality_flags`.
 
 ## Native IDs and routing
 
+Read `reference/native-id-dictionary.md`: `tpsrequestid = issue.id`,
+`tpsprojectid = project.id`, and `tpsaccountid = program.id`.
+These mappings are fixed; resolve connector syntax only when not already known.
+
 - `meta.workfront_ids.request_id` is the native Workfront issue GUID or null.
 - `meta.workfront_ids.project_id` is the native opportunity project GUID.
 - `meta.workfront_ids.program_id` is that project's native program GUID or null.

@@ -19,7 +19,7 @@ under `plugins/`; this repository remains a **marketplace**.
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.4.0** and `cxl-workbench-alltv` **1.2.0**
+**both** `tps-tv-alltv-skills` **2.4.1** and `cxl-workbench-alltv` **1.2.1**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -50,13 +50,23 @@ and validation. The adapters shape that result into their existing request/
 opportunity contracts, separately adding TPSC-native data and presentation.
 They do not restore a duplicate deep gather if the provider is missing.
 
-Request details retains six runtime references; opportunity details retains
-five. These cover provider invocation/mapping, the adapter output template,
+Request details retains seven runtime references; opportunity details retains
+six. These cover the native-ID dictionary, provider invocation/mapping, the adapter output template,
 same-day refresh, widget preference, and (request only) the upload submission
 shape. The templates remain complete for output compatibility, but their common
 fields are copied from the provider, not independently gathered. Deep-field
 discovery belongs to the provider; no legacy gathering maps, dictionaries, or
 populated examples are packaged in the detail skills.
+
+The [native-ID dictionary](plugins/cxl-workbench-alltv/skills/get-tps-central-context/reference/native-id-dictionary.md)
+is identical in the provider and all three Workfront-reading skills:
+`tpsrequestid` (summary alias `tpscrequestid`) equals `issue.id`,
+`tpsprojectid` equals `project.id`, and `tpsaccountid` equals `program.id`.
+These are native values, not custom-field lookups. The confirmed insights
+project path is `project.project_ID`; other native-ID connector syntax is
+resolved only when absent and reused in-session. Native live timestamp checks
+remain mandatory. No customer record, custom-field ID, or tenant URL from a
+trace is needed to encode these identity relationships.
 
 ### Reduced reads and deterministic enrichment
 

@@ -2,7 +2,7 @@
 name: tps-tv-tvall-request-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into post-request TV/AllTV engagement context, enriched with TPSC history and SharePoint metadata. Use for an existing TV request URL/reference, a DR/account with a submitted request, full context before TV artifacts, or context needed for a SharePoint attachment. Known-ID status/widget asks use a lightweight TPSC read and mandatory Workfront freshness checks instead of a full gather. An opportunity-only input goes to tps-tv-tvall-opp-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   visibility: public
 ---
 
@@ -33,6 +33,10 @@ Uploads are a separate, explicit intent handled by
 ## Workflow
 
 ### Step 0: Route the ask and choose presentation
+
+Read `reference/native-id-dictionary.md` before Workfront queries, including
+fast paths. TPSC IDs already equal native issue/project/program IDs. Use known
+connector ID paths directly; do not search for custom TPSC ID fields.
 
 Read and execute `reference/widget-preference.md` **before routing**. Recover
 the conversation's `presentationPreference.useWidget`, including an explicit

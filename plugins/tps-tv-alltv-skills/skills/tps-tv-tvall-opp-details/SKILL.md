@@ -2,7 +2,7 @@
 name: tps-tv-tvall-opp-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into pre-request opportunity context, enriched with TPSC project data. Use for an opportunity URL/reference, account-plus-owner lookup, manual pre-request context, or a known project's status/widget. Full context uses the provider; known-ID status/widget delivery remains valid even when requests exist and uses TPSC plus mandatory Workfront freshness checks. An issue input goes to tps-tv-tvall-request-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.1.0"
+  version: "2.1.1"
   visibility: public
 ---
 
@@ -30,6 +30,10 @@ No portfolio gather or upload here; route pipeline asks to
 ## Workflow
 
 ### Step 0: Choose presentation and route
+
+Read `reference/native-id-dictionary.md` before Workfront queries, including
+fast paths. TPSC IDs already equal native issue/project/program IDs. Use known
+connector ID paths directly; do not search for custom TPSC ID fields.
 
 Read and execute `reference/widget-preference.md` before routing. Recover
 the conversation's `presentationPreference.useWidget`, including explicit
