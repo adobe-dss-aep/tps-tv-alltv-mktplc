@@ -27,15 +27,27 @@ clarification.
 - `presentation: summary` is the default.
 - `presentation: return_to_caller` returns the validated file's actual path,
   classification, and limitations for the calling adapter to consume.
+- `context_profile: full` is the default for comprehensive context/artifacts.
+- `context_profile: widget_enrichment` requires `anchor_only` and uses the
+  explicit field selections in
+  [query-profiles.md](skills/get-tps-central-context/reference/query-profiles.md).
+  It excludes unneeded deep layers and requires documented connector projection,
+  not a broad summary followed by trimming. Excluded layers and failures are
+  explicit; this result cannot ground a full-context artifact.
 
 Schema 2.1 includes native Workfront IDs under `meta.workfront_ids` and nests
 opportunity details at `opportunity.opportunity_details`. Missing values stay
 null with explicit flags; no identifiers or field mappings are invented.
+The optional `meta.context_profile` is backward-compatible with existing full
+results. Reduced results require selected-path read evidence in
+`meta.enrichment_fields` and explicit data-quality limitations.
 
 `tps-tv-alltv-skills` 2.0.0 or later uses this provider for full request/
 opportunity context. The adapters separately add TPSC-native history, widgets,
 SharePoint metadata, and mandatory per-ask same-day checks. A provider context
 alone is not a TPSC widget or upload payload.
+TPS 2.4.0 uses CXL 1.2.0 for the reduced profile and deterministic widget
+enrichment. TPSC history and existing widget envelopes are not truncated.
 
 ## Output and validation
 

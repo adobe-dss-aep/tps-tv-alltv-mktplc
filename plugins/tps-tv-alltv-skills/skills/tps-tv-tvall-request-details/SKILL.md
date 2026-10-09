@@ -2,7 +2,7 @@
 name: tps-tv-tvall-request-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into post-request TV/AllTV engagement context, enriched with TPSC history and SharePoint metadata. Use for an existing TV request URL/reference, a DR/account with a submitted request, full context before TV artifacts, or context needed for a SharePoint attachment. Known-ID status/widget asks use a lightweight TPSC read and mandatory Workfront freshness checks instead of a full gather. An opportunity-only input goes to tps-tv-tvall-opp-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.0.2"
+  version: "2.1.0"
   visibility: public
 ---
 
@@ -43,12 +43,21 @@ true back to false. Pass `presentationPreference` on any logical skill handoff.
   `tps-tv-tvall-my-opp-summary`. Team-roster questions are out of scope; never
   call `tps_tv_read_direct_reports`.
 - Known `tpsrequestid`, `tpsprojectid`, and `tpsaccountid`, status/widget only:
-  use Step 0b. This does not produce full context or ground a TV artifact.
+  use Step 0b unless extra Workfront enrichment was explicitly requested.
+  This does not produce full context or ground a TV artifact.
 - All other anchored full-context asks: use Step 1. Accept a
   `workfront_request_url`, `workfront_request_reference`, or `account_name`
   with optional `person_name`; person-only lookup is also passed to the provider.
   Preserve reference-over-URL precedence and provider disambiguation.
 - An opportunity input with no request goes to `tps-tv-tvall-opp-details`.
+
+For widget/status asks without confirmed IDs, or an explicit request to enrich
+a widget with Workfront objectives/scope, use Step 1 with
+`context_profile: widget_enrichment`, then the existing TPSC/filter/refresh
+steps. Full-context/artifact asks use `context_profile: full`, even if delivered
+in a widget. Known-ID status asks keep Step 0b with no provider gather.
+`useWidget` alone never selects the reduced profile. Reduced output must be
+labeled widget enrichment, not complete context for an artifact.
 
 Resolve a default only when no earlier choice/state exists, as the shared
 procedure specifies. Provider `presentation: return_to_caller` is independent
@@ -74,6 +83,8 @@ of `useWidget`; do not reinterpret it as conversational preference.
 Read and execute `reference/context-provider.md`. Invoke
 `get-tps-central-context` with the original anchor inputs,
 `context_scope: anchor_only`, and `presentation: return_to_caller`.
+Pass the profile selected in Step 0. Reduced reads require CXL 1.2.0 or later;
+if unsupported, report the version dependency instead of running a broad gather.
 For a known issue GUID on a full-context ask, pass `workfront_request_id`.
 If the other adapter already passed a provider result for this same anchor
 during this invocation, validate and consume it rather than invoking again.
@@ -135,10 +146,20 @@ Use `reference/context-schema.json` as the adapter shape and the mapping in
 `reference/context-provider.md`. Copy common context layers from the provider;
 preserve nulls, sources, conflicts, team enrichment, and flags. Missing provider
 fields stay null/empty as the shape requires, with an explicit gap flag.
+Preserve `meta.context_profile` and `meta.enrichment_fields`. For reduced
+results, excluded layers are intentionally not gathered, never complete
+artifact-grounding context.
 Do not refetch deep fields to fill them. Keep the provider's `meta` block.
 Store the resolved `presentationPreference` in the adapted file, separately
 from the provider metadata and TPSC widget payload. Missing provider `useWidget`
 does not erase that setting.
+
+Read and execute `reference/widget-mapping.md` for provider-to-native enrichment.
+Use its helper on the selected, freshness-corrected widget envelope when Python
+is available; otherwise explicitly report manual mapping and apply its table.
+Only confirmed selected enrichment may overwrite TPSC values. Unselected
+template nulls/empties never erase native fields. The helper preserves unrelated
+fields/history; retain this step's request selection and SharePoint lifting.
 
 - Set root ID mirrors and `tpsc.ids` from confirmed IDs, not placeholders.
 - `tpsc.account`: the matching complete TPSC account, plus provider
@@ -207,6 +228,7 @@ For upload follow-ups, pass this adapted context to
 ## Resources
 
 - `reference/context-provider.md`: mandatory provider invocation and mapping.
+- `reference/widget-mapping.md`: exact enrichment mapping, guards, and helper.
 - `reference/widget-preference.md`: mandatory session preference/handoff gate.
 - `reference/same-day-refresh.md`: mandatory refresh, fast or full path.
 - `reference/context-schema.json`: adapted output shape, not provider input.

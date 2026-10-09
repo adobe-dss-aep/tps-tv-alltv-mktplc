@@ -19,7 +19,7 @@ under `plugins/`; this repository remains a **marketplace**.
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.3.0** and `cxl-workbench-alltv` **1.1.0**
+**both** `tps-tv-alltv-skills` **2.4.0** and `cxl-workbench-alltv` **1.2.0**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -50,13 +50,46 @@ and validation. The adapters shape that result into their existing request/
 opportunity contracts, separately adding TPSC-native data and presentation.
 They do not restore a duplicate deep gather if the provider is missing.
 
-Request details retains five runtime references; opportunity details retains
-four. These cover provider invocation/mapping, the adapter output template,
+Request details retains six runtime references; opportunity details retains
+five. These cover provider invocation/mapping, the adapter output template,
 same-day refresh, widget preference, and (request only) the upload submission
 shape. The templates remain complete for output compatibility, but their common
 fields are copied from the provider, not independently gathered. Deep-field
 discovery belongs to the provider; no legacy gathering maps, dictionaries, or
 populated examples are packaged in the detail skills.
+
+### Reduced reads and deterministic enrichment
+
+Full-context/artifact asks retain `context_profile: full`. Known-ID status
+asks still bypass the provider. Widget/status asks that need anchor resolution,
+and explicitly requested widget enrichment, use `context_profile:
+widget_enrichment` with `anchor_only`. The selected profile depends on content,
+not on the widget/text boolean. Reduced context cannot ground a full artifact.
+
+Tune selected Workfront meanings in the provider's
+[query profile](plugins/cxl-workbench-alltv/skills/get-tps-central-context/reference/query-profiles.md).
+It requires documented field projection instead of broad summaries, excludes
+unneeded deep layers, and reports an explicit limitation when projection is not
+supported. Profile/read-evidence metadata extends schema 2.1 compatibly; old
+full results remain accepted. No measured response-size savings are claimed
+without a live connector trace.
+
+Tune exact provider-to-native destinations in
+[widget mapping](plugins/tps-tv-alltv-skills/skills/tps-tv-tvall-request-details/reference/widget-mapping.md)
+and the shared
+[mapping helper](plugins/tps-tv-alltv-skills/scripts/map_widget_enrichment.py).
+Both adapters execute the mapping after selection and freshness. The helper
+matches native GUIDs, preserves unrelated records/history/SharePoint, copies
+only confirmed reduced-profile enrichment, and reports incompatible inputs.
+It writes only the native widget envelope, not preference/provider metadata.
+Python/file execution is optional for the mapper: unsupported hosts explicitly
+report manual mapping and follow the same guarded table. Full provider
+validation still requires Python as before.
+
+The helper measures mapping milliseconds, provider file bytes, and serialized
+widget-data bytes separately. Workfront response bytes and call counts must be
+measured at the actual tool boundary when observable; a trimmed provider file
+is not evidence of raw response-size reduction. TPSC history is not truncated.
 
 The provider defaults to `family` scope for standalone use, using only
 documented authorized relationships. It accepts typed native IDs without

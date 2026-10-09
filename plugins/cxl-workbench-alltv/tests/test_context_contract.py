@@ -40,6 +40,7 @@ class ContextContractTests(unittest.TestCase):
     def errors(self, context):
         errors = []
         VALIDATOR["_validate"](context, SCHEMA, "", errors)
+        VALIDATOR["validate_context_profile"](context, errors)
         return errors
 
     def test_request_context_matches_nested_contract(self):
@@ -58,6 +59,28 @@ class ContextContractTests(unittest.TestCase):
     def test_family_scope_remains_supported(self):
         self.context["meta"]["context_scope"] = "family"
         self.assertEqual(self.errors(self.context), [])
+
+    def test_reduced_profile_keeps_shape_and_declares_read_evidence(self):
+        self.context["meta"]["context_profile"] = "widget_enrichment"
+        self.context["meta"]["enrichment_fields"] = ["objectives"]
+        self.context["data_quality_flags"] = ["Reduced enrichment; excluded deep context"]
+        self.assertEqual(self.errors(self.context), [])
+        self.context["meta"]["context_scope"] = "family"
+        self.assertTrue(any("requires anchor_only" in error for error in self.errors(self.context)))
+
+    def test_reduced_profile_requires_evidence_and_limitations(self):
+        self.context["meta"]["context_profile"] = "widget_enrichment"
+        errors = self.errors(self.context)
+        self.assertTrue(any("enrichment_fields" in error for error in errors))
+        self.assertTrue(any("data_quality_flags" in error for error in errors))
+        self.context["meta"]["enrichment_fields"] = ["engagement.latest_update"]
+        self.assertTrue(any("enrichment_fields" in error for error in self.errors(self.context)))
+
+    def test_legacy_full_profile_and_invalid_profile(self):
+        del self.context["meta"]["context_profile"]
+        self.assertEqual(self.errors(self.context), [])
+        self.context["meta"]["context_profile"] = "unknown"
+        self.assertTrue(any("context_profile" in error for error in self.errors(self.context)))
 
     def test_root_details_do_not_replace_required_nested_details(self):
         self.context["opportunity_details"] = self.context["opportunity"].pop("opportunity_details")
@@ -82,6 +105,18 @@ class ContextContractTests(unittest.TestCase):
         self.assertEqual(VALIDATOR["resolve_schema"](None, "account.json"), expected)
         self.assertEqual(VALIDATOR["resolve_schema"]("context", "account.json"), expected)
         self.assertTrue(expected.is_file())
+
+    def test_provider_profiles_project_fields_before_querying(self):
+        skill = ROOT / "skills" / "get-tps-central-context"
+        text = (skill / "SKILL.md").read_text(encoding="utf-8")
+        profile = (skill / "reference" / "query-profiles.md").read_text(encoding="utf-8")
+        self.assertIn("context_profile: full", text)
+        self.assertIn("execute only the selected reads", text)
+        self.assertIn("no documented projection capability", profile)
+        self.assertIn("does not reduce Workfront response size", profile)
+        self.assertIn("Do not fetch excluded fields", profile)
+        self.assertIn("meta.enrichment_fields", profile)
+        self.assertIn("not complete artifact-grounding context", " ".join(profile.split()))
 
     def test_adapter_common_fields_and_tpsc_nesting(self):
         skills = ROOT.parent / "tps-tv-alltv-skills" / "skills"

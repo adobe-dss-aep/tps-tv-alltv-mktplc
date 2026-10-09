@@ -2,13 +2,13 @@
 name: get-tps-central-context
 description: Gather authorized Workfront opportunity or request context for Technical Validation. Accept URLs, references, confirmed native GUIDs, scoped account/person lookups, or manual input. Produce a validated structured context with provenance, conflicts, distinct net-new/renewal amounts, and explicit gaps. Acts as the required full-context provider for the TV/AllTV request and opportunity adapters; it does not fetch TPSC widget/history/SharePoint payloads.
 metadata:
-  version: "2.3.0"
+  version: "2.4.0"
   visibility: public
 ---
 
 # Get TPS Central Context
 
-Context schema version: **2.1**. Skill version: **2.3**.
+Context schema version: **2.1**. Skill version: **2.4**.
 All bundled reference data is empty or generalized. Resolve fields and
 relationships at runtime through the authorized connector; no private map or
 tenant identifier ships with this plugin.
@@ -25,6 +25,12 @@ contradictory anchors. Record contradictions as data-quality flags.
 Accept `context_scope` as `family` (default) or `anchor_only`, and
 `presentation` as `summary` (default) or `return_to_caller`.
 Reject unsupported values explicitly.
+
+Accept `context_profile: full` (default) or `widget_enrichment`. Read and execute
+`reference/query-profiles.md` before anchor resolution or gathering. Reduced
+enrichment requires `anchor_only`; reject incompatible scope explicitly.
+Keep full-context/artifact requests on `full`. The reduced profile is not
+complete artifact-grounding context and must be labeled accordingly.
 
 `anchor_only` gathers only the anchored issue and its parent project, or the
 anchored opportunity project. Do not discover siblings; both linked-opportunity
@@ -52,6 +58,12 @@ Tenant scope must be supplied privately or resolved through documented lookups.
 A missing connector, rejected query, unresolved field, or authorization failure
 must be reported explicitly.
 
+For `widget_enrichment`, use documented projected field queries, not broad
+summaries. Follow the profile's minimal anchor and enrichment selections.
+For `full`, explicitly select the fields needed for the existing context
+contract where supported; avoid unrelated access/sharing/history collections.
+Resolve and reuse metadata in-session, never previous-ask record values.
+
 ## Step 2: Resolve and classify the anchor
 
 For URLs, read the documented object type/GUID from the supplied URL; never
@@ -73,6 +85,10 @@ relationship without guessing from an account name or a cached TPSC snapshot.
 Preserve a confirmed delivered stage rather than resetting it to post-request.
 
 ## Step 3: Gather the context once
+
+For `widget_enrichment`, execute only the selected reads in
+`reference/query-profiles.md`, then proceed to Step 4. Do not run the
+comprehensive gather below or dispatch a broad extractor for this profile.
 
 Use `reference/context-schema.json` as the output shape. Discover the
 configured fields for account firmographics, opportunity details, objectives,
@@ -103,8 +119,10 @@ be reused, but an earlier record snapshot is not current context.
 
 ## Step 4: Stamp and validate the provider contract
 
-Populate `meta.schema_version: "2.1"`, `meta.skill_version: "2.3"`,
+Populate `meta.schema_version: "2.1"`, `meta.skill_version: "2.4"`,
 `meta.generated_at` in UTC, `meta.context_scope`, and the winning `meta.anchor`.
+Stamp `meta.context_profile` and reduced-profile `meta.enrichment_fields` as
+specified in the query profile contract.
 Anchor types are request/opportunity reference, URL, or ID, `account_lookup`,
 or `manual`, as enumerated by the machine schema.
 
@@ -117,7 +135,9 @@ Do not put CRM account IDs, DRs, references, or placeholders into this block.
 Copy populated common layers into the shape, including nested
 `opportunity.opportunity_details`, `opportunity.gnarr`, team, request,
 engagement, and scope-appropriate pipeline rollups. Every layer must be
-attempted or explicitly unavailable; do not claim an unattempted layer is empty.
+attempted or explicitly unavailable for `full`; for `widget_enrichment`,
+explicitly flag deliberately excluded layers instead of gathering them.
+Do not claim an unattempted layer is a confirmed empty result.
 
 Write a candidate file in the private working environment, then run the
 bundled `scripts/validate.py <actual-path> context`. Resolve its reachable

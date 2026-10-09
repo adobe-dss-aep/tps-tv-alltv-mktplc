@@ -15,6 +15,11 @@ Use authorized structured summaries when available, otherwise query resolved
 fields. Return only the structured fragment, native object ID/type, sources,
 and data-quality flags. Do not narrate or write generated data into the plugin.
 
+The main skill supplies `context_profile`. This extractor is for `full` reads
+only; reject reduced-profile dispatches instead of gathering extra fields.
+Use documented explicit field selection for the required fragment where
+supported; do not request unrelated sharing, access, history, or attachments.
+
 For projects, read authorized firmographics, opportunity details, scope,
 team, dates, risks, and separate net-new/renewal/grand-total values. For issues,
 read request scope/objectives/management and native parent project identity.

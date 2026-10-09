@@ -2,7 +2,7 @@
 name: tps-tv-tvall-opp-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into pre-request opportunity context, enriched with TPSC project data. Use for an opportunity URL/reference, account-plus-owner lookup, manual pre-request context, or a known project's status/widget. Full context uses the provider; known-ID status/widget delivery remains valid even when requests exist and uses TPSC plus mandatory Workfront freshness checks. An issue input goes to tps-tv-tvall-request-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.0.2"
+  version: "2.1.0"
   visibility: public
 ---
 
@@ -38,7 +38,15 @@ do not re-default true to false when switching from summary/request details.
 Provider `presentation: return_to_caller` does not change the user's boolean.
 
 If `tpsprojectid` and `tpsaccountid` are known and the ask is status/widget only,
-use Step 0b. Otherwise use Step 1 for full context or anchor resolution.
+use Step 0b unless extra Workfront enrichment was explicitly requested.
+Otherwise use Step 1 for full context, enrichment, or anchor resolution.
+
+For widget/status asks without confirmed IDs, or explicitly requested Workfront
+widget enrichment, pass `context_profile: widget_enrichment` in Step 1.
+Full-context/artifact asks use `context_profile: full` regardless of widget/text
+preference. Known-ID status asks keep Step 0b without a provider gather.
+`useWidget` alone never selects the reduced profile. Label reduced output as
+widget enrichment, not complete artifact-grounding context.
 
 ### Step 0b: Known-ID status/widget fast path
 
@@ -63,6 +71,8 @@ Invoke the installed provider as described in `reference/context-provider.md`.
 Pass `workfront_opportunity_url`, `workfront_opportunity_reference`,
 `account_name`/`owner_name`, or `manual_context`, with
 `context_scope: anchor_only` and `presentation: return_to_caller`.
+Pass the selected `context_profile`. Reduced reads require CXL 1.2.0 or later;
+report unsupported versions instead of silently gathering broad context.
 For a known project GUID on a full-context ask, pass `workfront_opportunity_id`.
 If the other adapter already passed a provider result for this same anchor
 during this invocation, validate and consume it rather than invoking again.
@@ -121,6 +131,12 @@ Map common provider layers using `reference/context-provider.md` into
 team enrichment, conflicts, and flags; never refetch missing deep fields.
 Store resolved `presentationPreference` in the adapted file, not the provider
 source or widget `data`. A missing boolean in provider output is not a reset.
+Preserve `meta.context_profile` and `meta.enrichment_fields`. Reduced results
+declare excluded layers; they are never complete artifact-grounding context.
+Read and execute `reference/widget-mapping.md` on the freshness-corrected
+envelope for provider enrichment, using its helper when Python is available.
+Report manual mapping when unavailable. Unselected template nulls/empties never
+erase TPSC values; preserve nested requests, activity, and unrelated fields.
 The provider's anchor-only result has no discovered siblings; keep deep
 `linked_opportunities` empty rather than manufacturing sibling context.
 
@@ -176,6 +192,7 @@ No upload, direct-reports lookup, or additional deep gather afterward.
 ## Resources
 
 - `reference/context-provider.md`: mandatory provider invocation and mapping.
+- `reference/widget-mapping.md`: exact enrichment mapping, guards, and helper.
 - `reference/widget-preference.md`: mandatory session preference/handoff gate.
 - `reference/same-day-refresh.md`: mandatory refresh on fast and full paths.
 - `reference/context-schema.json`: adapted opportunity output shape.

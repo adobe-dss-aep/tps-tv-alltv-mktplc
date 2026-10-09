@@ -13,6 +13,22 @@ plugin root, or implement a fallback deep gather. If unavailable, explicitly
 request installation/enabling of the provider plugin and stop the full gather.
 Known-ID status paths and the portfolio summary do not require a full gather.
 
+## Read profiles
+
+CXL 1.2.0 adds `context_profile: full` (default) and `widget_enrichment`.
+Full-context/artifact requests retain `full`. Known-ID status/widget reads
+still bypass the provider. Widget/status reads needing anchor resolution or
+explicit Workfront enrichment use `widget_enrichment` with `anchor_only`.
+Selection is based on the requested content, never on `useWidget` alone.
+Unsupported reduced profiles are a dependency error, not a broad-read fallback.
+
+Reduced results preserve schema 2.1 but declare their profile and excluded
+layers. Require `meta.context_profile: widget_enrichment` and an explicit
+`meta.enrichment_fields` array for reduced calls. Reject mismatched profiles;
+never reuse reduced results for full-context/artifact requests. A full result
+may satisfy a reduced ask in this same invocation, without another gather.
+Legacy results without a profile count as `full` only.
+
 Pass the user's original URL/reference/account lookup. For confirmed GUIDs,
 use provider `workfront_request_id` or `workfront_opportunity_id`, not a made-up
 URL. Alternatively pass an already-confirmed
@@ -94,3 +110,8 @@ The raw provider context is never a valid upload payload or widget payload.
 Request-details builds `tpsc.requests` and lifts SharePoint metadata;
 opportunity-details preserves each project's nested `requests[]`.
 Only the adapters assemble those use-case-specific outputs.
+
+Use `reference/widget-mapping.md` for exact provider-to-native enrichment,
+including deterministic helper execution and selected-field/null precedence.
+Preserve complete TPSC records and existing output shapes. Measure mapping
+time and file/widget bytes separately from raw Workfront response bytes.

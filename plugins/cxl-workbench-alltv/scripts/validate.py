@@ -105,6 +105,18 @@ def resolve_schema(arg, doc_path):
     return SCHEMA_DIR / SHORTHANDS["context"]
 
 
+def validate_context_profile(doc, errs):
+    meta = doc.get("meta") if isinstance(doc, dict) else None
+    if not isinstance(meta, dict) or meta.get("context_profile", "full") != "widget_enrichment":
+        return
+    if meta.get("context_scope") != "anchor_only":
+        errs.append("meta.context_scope: widget_enrichment requires anchor_only")
+    if "enrichment_fields" not in meta:
+        errs.append("meta.enrichment_fields: widget_enrichment requires explicit read evidence")
+    if not doc.get("data_quality_flags"):
+        errs.append("data_quality_flags: reduced context must declare its limitations")
+
+
 def main(doc_path, schema_arg=None):
     doc_p = pathlib.Path(doc_path)
     schema_p = resolve_schema(schema_arg, doc_path)
@@ -123,6 +135,8 @@ def main(doc_path, schema_arg=None):
 
     errs = []
     _validate(doc, schema, "", errs)
+    if schema_p.resolve() == (SCHEMA_DIR / SHORTHANDS["context"]).resolve():
+        validate_context_profile(doc, errs)
     if errs:
         seen = set()
         for e in errs:

@@ -14,6 +14,11 @@
         "skill_version": { "type": "string" },
         "generated_at": { "type": "string" },
         "context_scope": { "enum": ["family", "anchor_only"] },
+        "context_profile": { "enum": ["full", "widget_enrichment"] },
+        "enrichment_fields": {
+          "type": "array",
+          "items": { "enum": ["account_firmographics.sub_name", "record_links.primary_opportunity_project", "record_links.tv_request_issue", "objectives", "use_cases", "products_in_scope", "timeline", "influenced_pipeline_usd"] }
+        },
         "workfront_ids": {
           "type": "object",
           "required": ["request_id", "project_id", "program_id"],

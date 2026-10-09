@@ -191,6 +191,7 @@ class SkillWorkflowContractTests(unittest.TestCase):
             "context-schema.json",
             "same-day-refresh.md",
             "widget-preference.md",
+            "widget-mapping.md",
         }
         for name in READ_SKILLS[1:]:
             with self.subTest(skill=name):
@@ -206,6 +207,17 @@ class SkillWorkflowContractTests(unittest.TestCase):
                 ):
                     self.assertTrue((SKILLS / name / resource).is_file(), resource)
                 self.assertIn("not an extraction", skill_text(name))
+
+    def test_details_select_profile_by_content_and_execute_mapping(self):
+        for name in READ_SKILLS[1:]:
+            with self.subTest(skill=name):
+                text = skill_text(name)
+                self.assertIn("context_profile: widget_enrichment", text)
+                self.assertIn("context_profile: full", text)
+                self.assertIn("`useWidget` alone never selects", text)
+                self.assertIn("Read and execute `reference/widget-mapping.md`", text)
+                self.assertIn("meta.enrichment_fields", text)
+                self.assertIn("template nulls/empties never", text)
 
     def test_request_upload_submission_copies_match(self):
         filename = "tpsc-request-details-submission-schema.json"
