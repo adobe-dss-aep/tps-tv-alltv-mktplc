@@ -22,9 +22,11 @@ class SkillWorkflowContractTests(unittest.TestCase):
 
     def setUp(self):
         self.summary = skill_text(READ_SKILLS[0])
-        self.preference = (
+        self.summary_preference = (
             SKILLS / READ_SKILLS[0] / "reference" / "widget-preference.md"
         ).read_text(encoding="utf-8")
+
+        self.preference = (SKILLS / READ_SKILLS[1] / "reference" / "widget-preference.md").read_text(encoding="utf-8")
 
     def test_my_team_is_a_standalone_widget_skill(self):
         text = skill_text("tps-tv-alltv-my-team")
@@ -54,98 +56,61 @@ class SkillWorkflowContractTests(unittest.TestCase):
         self.assertIn("subsequent person's pipeline request", text)
         self.assertIn("`tps-tv-tvall-my-opp-summary`", text)
 
-    def test_summary_checks_native_timestamps_before_presenting(self):
-        checks = self.summary.index("## Step 2: Mandatory native timestamp calls")
-        refresh = self.summary.index("## Step 3: Refresh records changed today")
-        gate = self.summary.index("## Step 4: Completion gate")
-        self.assertLess(checks, refresh)
-        self.assertLess(refresh, gate)
-        self.assertIn("insights_find_workfront_data", self.summary[checks:refresh])
-        self.assertIn("issue-rooted", self.summary[checks:refresh])
-        self.assertIn("project-rooted", self.summary[checks:refresh])
-        self.assertIn("tpscrequestid", self.summary[checks:refresh])
-        self.assertIn("tpsprojectid", self.summary[checks:refresh])
-        self.assertIn("lastUpdateDate", self.summary[checks:refresh])
+    def test_summary_is_tpsc_only_including_failures_and_refresh_requests(self):
+        self.assertIn("The only data source is `tps_tv_read_tpsc_user_summary`", self.summary)
+        self.assertIn("In no circumstances use the Workfront connector", self.summary)
+        self.assertIn("never perform a Workfront check, even on an explicit refresh request", self.summary)
+        self.assertIn("Do not invoke a context provider or detail skill", self.summary)
+        self.assertNotIn("insights_", self.summary)
+        self.assertNotIn("same-day-refresh.md", self.summary)
+        self.assertNotIn("native-id-dictionary.md", self.summary)
+        tools = set(re.findall(r"`(tps_tv_[a-z_]+)`", self.summary))
+        self.assertEqual(tools, {"tps_tv_read_tpsc_user_summary", "tps_tv_read_tpsc_user_summary_widget"})
 
-    def test_summary_does_not_stop_at_reference_loading(self):
-        self.assertIn("do not stop at loading the reference", self.summary)
-        self.assertIn("No previous-ask record cache", self.summary)
-        self.assertIn("freshnessEvidence", self.summary)
-        self.assertIn("No entry remains `pending`", self.summary)
-        self.assertIn("actual tool results", self.summary)
-        self.assertIn("unrefreshed/partially refreshed TPSC snapshot", self.summary)
+    def test_summary_defaults_to_conversation_without_onboarding(self):
+        self.assertIn("Conversational text is the default", self.summary)
+        self.assertIn("Do not ask a widget-versus-text onboarding question", self.summary)
+        self.assertIn("model judgment", self.summary)
+        self.assertIn("no explicit choice", self.summary_preference)
+        self.assertIn('"useWidget": false, "source": "default"', self.summary_preference)
 
-    def test_summary_discovers_workfront_before_tpsc_fetch(self):
-        discovery = self.summary.index("## Step 0a: Discover Workfront")
-        fetch = self.summary.index("## Step 1: Fetch")
-        self.assertLess(discovery, fetch)
-        phase = self.summary[discovery:fetch]
-        for tool in (
-            "insights_read_docs", "insights_list_entities",
-            "insights_search_fields", "insights_get_field_paths",
-            "insights_find_workfront_data",
-        ):
-            self.assertIn(tool, phase)
-        self.assertIn("server namespaces", phase)
-        self.assertIn("does not discover the separate Workfront", self.summary)
-        self.assertIn('enrichment "optional"', self.summary)
+    def test_summary_requires_explicit_opt_in_not_inference(self):
+        self.assertIn("earlier explicit readout opt-in", self.summary)
+        self.assertIn("Never infer widget opt-in", self.summary_preference)
+        self.assertIn("inferred/default/unknown provenance", self.summary_preference)
+        self.assertIn("without erasing the explicit preference", self.summary)
+        self.assertIn("unmodified by external", self.summary)
 
-    def test_summary_refresh_phase_is_self_contained(self):
-        checks = self.summary.index("## Step 2: Mandatory native timestamp calls")
-        refresh = self.summary.index("## Step 3: Refresh records changed today")
-        gate = self.summary.index("## Step 4: Completion gate")
-        for document in ("mcp-usage", "conditions", "implicit-patterns", "dates"):
-            self.assertIn(document, self.summary[checks:refresh])
-        phase = self.summary[refresh:gate]
-        self.assertIn("insights_find_workfront_data", phase)
-        self.assertIn("issue-rooted", phase)
-        self.assertIn("project-rooted", phase)
-        self.assertIn("lastUpdateDate", phase)
-        for field in (
-            "requeststage", "requesthealth", "blockerinfo", "latestcomment",
-            "techcasestatus", "techriskcomments",
-        ):
-            self.assertIn(field, phase)
-        self.assertIn("not a delegated execution step", self.summary)
+    def test_summary_has_no_workfront_resources(self):
+        resources = SKILLS / READ_SKILLS[0] / "reference"
+        self.assertEqual({path.name for path in resources.iterdir()}, {"widget-preference.md"})
 
-    def test_summary_checks_large_portfolios_and_reports_query_evidence(self):
-        self.assertIn("No project-count cutoff", self.summary)
-        self.assertIn("Do not sample", self.summary)
-        self.assertIn("skip project-only entries", self.summary)
-        self.assertIn("report the unchecked counts", self.summary)
-        gate = self.summary[self.summary.index("## Step 4: Completion gate"):]
-        self.assertIn("Workfront freshness", gate)
-        self.assertIn("timestamp-query", gate)
-        self.assertIn("field-refresh-query", gate)
-        self.assertIn("missing-ID entries", gate)
-        self.assertIn("this invocation's evidence", gate)
-
-    def test_summary_onboarding_precedes_data_fetch(self):
-        self.assertLess(
-            self.summary.index("## Step 0: Resolve presentation"),
-            self.summary.index("## Step 1: Fetch"),
-        )
-        self.assertIn("ask once, and wait", self.summary)
-        self.assertIn("retain the original", self.summary)
-        self.assertIn("Interactive", self.preference)
-        self.assertIn("Conversational text", self.preference)
-        self.assertIn("skip onboarding", self.preference)
+    def test_details_still_require_workfront_freshness(self):
+        copies = [
+            (SKILLS / name / "reference" / "same-day-refresh.md").read_bytes()
+            for name in READ_SKILLS[1:]
+        ]
+        self.assertEqual(copies[0], copies[1])
+        text = copies[0].decode("utf-8")
+        self.assertIn("On **every new ask**", text)
+        self.assertIn("timestamp", text)
+        for name in READ_SKILLS[1:]:
+            self.assertIn("reference/same-day-refresh.md", skill_text(name))
 
     def test_preference_is_recovered_not_redefaulted(self):
         self.assertIn("Both `useWidget: true` and `useWidget: false`", self.preference)
-        self.assertIn("Never treat", self.preference)
         self.assertIn("false as missing", self.preference)
         self.assertIn("most recent explicit choice", self.preference)
         self.assertIn("does not erase", self.preference)
-        self.assertIn("does **not** mean `useWidget: false`", self.preference)
-        self.assertIn("without silently changing the preference", self.preference)
+        self.assertNotIn("## One-time summary onboarding", self.preference)
 
-    def test_all_preference_reference_copies_match(self):
+    def test_detail_preference_reference_copies_match(self):
         contents = [
             (SKILLS / name / "reference" / "widget-preference.md").read_bytes()
-            for name in READ_SKILLS
+            for name in READ_SKILLS[1:]
         ]
-        self.assertEqual(len(set(contents)), 1)
+        self.assertEqual(contents[0], contents[1])
+        self.assertNotEqual(contents[0], (SKILLS / READ_SKILLS[0] / "reference" / "widget-preference.md").read_bytes())
 
     def test_details_check_preference_on_fast_and_full_paths(self):
         for name in READ_SKILLS[1:]:
@@ -168,7 +133,7 @@ class SkillWorkflowContractTests(unittest.TestCase):
         self.assertIn("presentationPreference", handoff)
         self.assertIn("tps-tv-tvall-request-details", handoff)
         self.assertIn("tps-tv-tvall-opp-details", handoff)
-        self.assertIn("Do not invoke that provider for every summary row", self.summary)
+        self.assertIn("Only a separate user request", handoff)
 
     def test_adapted_shape_stores_preference_outside_widget_payload(self):
         for name in READ_SKILLS[1:]:
@@ -223,7 +188,7 @@ class SkillWorkflowContractTests(unittest.TestCase):
     def test_native_id_dictionary_is_shared_and_loaded_before_reads(self):
         provider = ROOT.parent / "cxl-workbench-alltv" / "skills" / "get-tps-central-context"
         dictionary = (provider / "reference" / "native-id-dictionary.md").read_bytes()
-        for name in READ_SKILLS:
+        for name in READ_SKILLS[1:]:
             with self.subTest(skill=name):
                 self.assertEqual(
                     (SKILLS / name / "reference" / "native-id-dictionary.md").read_bytes(),

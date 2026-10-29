@@ -30,4 +30,4 @@ report the error, resolve the replacement once, and retry using current metadata
 For insights result cells such as `{"value": "<native ID>"}`, read the `value`
 member before matching by GUID. Map by ID, not row order; preserve field values,
 decode rich text separately, and never substitute a project name's URL for an ID.
-Keep identical copies in the provider and three Workfront-reading adapters.
+Keep identical copies in the provider and two Workfront-reading detail adapters.

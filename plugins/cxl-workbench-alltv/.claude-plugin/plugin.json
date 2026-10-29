@@ -1,6 +1,6 @@
 {
   "name": "cxl-workbench-alltv",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Public-safe Workfront context provider for TV/AllTV adapters. Includes get-tps-central-context, one extraction agent, empty context contracts, and a standard-library Python validator. Requires user-configured authorized connectors and runtime field discovery.",
   "author": {
     "name": "adobe-dss-aep",

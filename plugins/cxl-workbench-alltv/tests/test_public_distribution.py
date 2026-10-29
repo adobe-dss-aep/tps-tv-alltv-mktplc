@@ -57,7 +57,7 @@ class PublicDistributionTests(unittest.TestCase):
         self.assertEqual(provider_copies[0], provider_copies[1])
         refresh_copies = [
             (skills / name / "reference" / "same-day-refresh.md").read_bytes()
-            for name in details + ["tps-tv-tvall-my-opp-summary"]
+            for name in details
         ]
         self.assertEqual(len(set(refresh_copies)), 1)
         self.assertIn(b"every new ask", refresh_copies[0])

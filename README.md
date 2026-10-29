@@ -19,7 +19,7 @@ under `plugins/`; this repository remains a **marketplace**.
 
 In a Claude environment that supports GitHub marketplaces, add
 `adobe-dss-aep/tps-tv-alltv-mktplc` as the marketplace source and install
-**both** `tps-tv-alltv-skills` **2.4.1** and `cxl-workbench-alltv` **1.2.1**
+**both** `tps-tv-alltv-skills` **3.0.0** and `cxl-workbench-alltv` **1.2.2**
 for full-context workflows. Follow the installation flow provided by that
 environment. The provider is a skill-level dependency, not an automatically
 installed package.
@@ -59,7 +59,7 @@ discovery belongs to the provider; no legacy gathering maps, dictionaries, or
 populated examples are packaged in the detail skills.
 
 The [native-ID dictionary](plugins/cxl-workbench-alltv/skills/get-tps-central-context/reference/native-id-dictionary.md)
-is identical in the provider and all three Workfront-reading skills:
+is identical in the provider and both Workfront-reading detail skills:
 `tpsrequestid` (summary alias `tpscrequestid`) equals `issue.id`,
 `tpsprojectid` equals `project.id`, and `tpsaccountid` equals `program.id`.
 These are native values, not custom-field lookups. The confirmed insights
@@ -105,7 +105,7 @@ The provider defaults to `family` scope for standalone use, using only
 documented authorized relationships. It accepts typed native IDs without
 constructing Workfront URLs. No private maps or dictionaries are bundled.
 
-Every new status/context ask checks native Workfront update timestamps in
+Every new detail status/context ask checks native Workfront update timestamps in
 batches, with no one-hour or same-session record skip. Records updated today
 are corrected through confirmed runtime semantic mappings before text, widget,
 or adapted-file output. Missing mappings/errors remain explicit partial-refresh
@@ -116,29 +116,20 @@ full-context follow-up through a detail adapter. Uploads use a complete supplied
 payload directly, or get the request adapter's enriched output. A raw provider
 file is not a widget or upload payload.
 
-When the pipeline summary starts a conversation with no presentation preference,
-it briefly explains interactive widgets versus conversational text and asks
-once before fetching data. The chosen boolean is carried across summary,
-request, and opportunity follow-ups, including provider returns and adapter
-handoffs. Explicit true and false remain sticky until the user changes them;
-an upload widget or a data-only tool response does not change that setting.
+Opportunity summaries use only `tps_tv_read_tpsc_user_summary`. They never
+discover or call Workfront, refresh timestamps, gather context, or enrich results
+through another tool, even on failure or an explicit freshness request.
+The model writes a conversational answer grounded in the returned data by
+default, without a blocking presentation question. The summary widget is
+explicit opt-in only: a current request or prior explicit readout choice in
+the conversation, not inferred interaction or an inherited default true.
+Widget data is the summary tool's returned arrays, without external enrichment.
 
-The summary has an inline execution/completion gate: nonempty issue/project
-collections require actual native timestamp tool calls, and today's records
-require corrected fields or explicit partial failures before either text or
-widget output. Its self-contained Workfront phase discovers the separate
-Workfront tools before the TPSC read, initializes the insights session, and
-explicitly calls native timestamp queries followed by field-refresh queries
-for records changed today. Generic widget descriptions that call enrichment
-optional do not bypass this phase.
-
-There is no project-count cutoff: every returned request/project is checked,
-using deduplicated IDs, documented batch limits, and complete pagination.
-Large portfolios may take longer. An actual execution limit is reported with
-unchecked counts rather than silently skipping records. The phase is isolated
-so a later performance release can remove it deliberately; it is mandatory now.
-A Workfront freshness line reports checked/refreshed/unresolved counts and
-actual timestamp-query and field-refresh-query call counts for this invocation.
+Separate user-requested detail follow-ups retain their existing Workfront
+freshness policies and receive the resolved presentation preference. A summary
+never dispatches detail reads to supplement its own answer. Summary-only
+operation requires neither Workfront nor the CXL provider. Structural tests
+guard this boundary; live execution still needs verification in the client.
 
 ## Public distribution scope
 

@@ -1,13 +1,11 @@
 # Mandatory per-ask same-day refresh
 
-Use this procedure for summary and detail outputs before text, widgets, or
-adapted files. Identical local copies keep all three read skills self-contained.
+Use this procedure for request and opportunity detail outputs before text, widgets, or
+adapted files. Identical local copies keep both detail skills self-contained.
 No private field map, tenant identifier, or production endpoint is included.
 
 ## Collect the returned records
 
-- Summary: top-level projects and requests; inspect whether request GUIDs are
-  named `tpscrequestid` in the advertised response.
 - Request details: top-level projects and requests; request GUIDs are
   `tpsrequestid` in the documented detail response.
 - Opportunity details: projects with their own nested requests; request GUIDs

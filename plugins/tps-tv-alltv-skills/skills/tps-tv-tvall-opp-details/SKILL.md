@@ -2,7 +2,7 @@
 name: tps-tv-tvall-opp-details
 description: Adapts get-tps-central-context from the required cxl-workbench-alltv plugin into pre-request opportunity context, enriched with TPSC project data. Use for an opportunity URL/reference, account-plus-owner lookup, manual pre-request context, or a known project's status/widget. Full context uses the provider; known-ID status/widget delivery remains valid even when requests exist and uses TPSC plus mandatory Workfront freshness checks. An issue input goes to tps-tv-tvall-request-details; a person's pipeline goes to tps-tv-tvall-my-opp-summary.
 metadata:
-  version: "2.1.1"
+  version: "2.1.2"
   visibility: public
 ---
 

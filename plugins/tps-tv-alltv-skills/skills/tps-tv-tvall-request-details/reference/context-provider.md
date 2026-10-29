@@ -11,7 +11,9 @@ skill discovery, then load/invoke the skill using the host's supported mechanism
 Do not guess an MCP tool name, use another plugin's files relative to this
 plugin root, or implement a fallback deep gather. If unavailable, explicitly
 request installation/enabling of the provider plugin and stop the full gather.
-Known-ID status paths and the portfolio summary do not require a full gather.
+Known-ID detail status paths do not require a full gather. Portfolio summaries
+never invoke this provider or Workfront; their data comes only from the TPSC
+summary tool. Only a separate user-requested detail ask may enter this contract.
 
 ## Read profiles
 
